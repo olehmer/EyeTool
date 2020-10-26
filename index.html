@@ -1,0 +1,74 @@
+<div class="container">
+    <div class="slidecont">
+        <input type="range" min="1" max="100" value="50" class="slider" 
+         id="slider" onchange="updateSize(this.value)">
+    </div>
+    <canvas id="canvas">
+        Your browser doesn't support HTML canvas. 
+        Please upgrade to a newer browser.
+    </canvas>
+</div>
+
+
+<script src="app.js"></script>
+
+<style>
+    canvas{
+        background-color:black;
+    }
+    div.container{
+        margin:0;
+        position:fixed;
+        left:0;
+        top:0;
+        width:100%;
+        height:100%;
+    }
+    div.slidecont{
+        position:fixed;
+        top:3px;
+        left:0;
+        width:100%;
+        margin:auto;
+        text-align:center;
+    }
+    .slider{
+        width:80%;
+    }
+
+.arrow-up {
+  width: 0; 
+  height: 0; 
+  border-left: 20px solid transparent;
+  border-right: 20px solid transparent;
+  border-bottom: 20px solid blue;
+}
+
+.arrow-down {
+  width: 0; 
+  height: 0; 
+  border-left: 20px solid transparent;
+  border-right: 20px solid transparent;
+  border-top: 20px solid blue;
+}
+
+.arrow-right {
+  width: 0; 
+  height: 0; 
+  border-top: 20px solid transparent;
+  border-bottom: 20px solid transparent;
+  border-left: 20px solid blue;
+}
+
+.arrow-left {
+  width: 0; 
+  height: 0; 
+  border-top: 20px solid transparent;
+  border-bottom: 20px solid transparent; 
+  border-right:20px solid blue; 
+}
+
+</style>
+
+
+
