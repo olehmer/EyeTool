@@ -7,6 +7,17 @@
         Your browser doesn't support HTML canvas. 
         Please upgrade to a newer browser.
     </canvas>
+
+    <div class="arrow-up upred arrow" onclick="arrowClick(1)"></div>
+    <div class="arrow-down downred arrow" onclick="arrowClick(2)"></div>
+    <div class="arrow-left leftred arrow" onclick="arrowClick(3)"></div>
+    <div class="arrow-right rightred arrow" onclick="arrowClick(4)"></div>
+
+    <div class="arrow-up upgreen arrow" onclick="arrowClick(5)"></div>
+    <div class="arrow-down downgreen arrow" onclick="arrowClick(6)"></div>
+    <div class="arrow-left leftgreen arrow" onclick="arrowClick(7)"></div>
+    <div class="arrow-right rightgreen arrow" onclick="arrowClick(8)"></div>
+
 </div>
 
 
@@ -36,12 +47,30 @@
         width:80%;
     }
 
-.arrow-up {
+
+.arrow{
+  cursor:pointer;
+}
+.arrow:active{
+    opacity:0.7;
+}
+.arrow-up{
   width: 0; 
   height: 0; 
   border-left: 20px solid transparent;
   border-right: 20px solid transparent;
-  border-bottom: 20px solid blue;
+}
+.upred{
+  border-bottom: 40px solid red;
+  position:fixed;
+  bottom: 100px;
+  left:50px;
+}
+.upgreen{
+  border-bottom: 40px solid green;
+  position:fixed;
+  bottom: 100px;
+  right:50px;
 }
 
 .arrow-down {
@@ -49,7 +78,18 @@
   height: 0; 
   border-left: 20px solid transparent;
   border-right: 20px solid transparent;
-  border-top: 20px solid blue;
+}
+.downred{
+  border-top: 40px solid red;
+  position:fixed;
+  bottom: 10px;
+  left:50px;
+}
+.downgreen{
+  border-top: 40px solid green;
+  position:fixed;
+  bottom: 10px;
+  right:50px;
 }
 
 .arrow-right {
@@ -57,7 +97,18 @@
   height: 0; 
   border-top: 20px solid transparent;
   border-bottom: 20px solid transparent;
-  border-left: 20px solid blue;
+}
+.rightred{
+  border-left: 40px solid red;
+  position:fixed;
+  bottom: 55px;
+  left:95px;
+}
+.rightgreen{
+  border-left: 40px solid green;
+  position:fixed;
+  bottom: 55px;
+  right:5px;
 }
 
 .arrow-left {
@@ -65,7 +116,18 @@
   height: 0; 
   border-top: 20px solid transparent;
   border-bottom: 20px solid transparent; 
-  border-right:20px solid blue; 
+}
+.leftred {
+  border-right:40px solid red; 
+  position:fixed;
+  bottom: 55px;
+  left:5px;
+}
+.leftgreen{
+  border-right:40px solid green; 
+  position:fixed;
+  bottom: 55px;
+  right:95px;
 }
 
 </style>

@@ -48,8 +48,8 @@ function resizeCanvas(){
     ctx.canvas.width = window.innerWidth;
     ctx.canvas.height = window.innerHeight;
 
-    CLICK_DIST = 0.01*(ctx.canvas.width + ctx.canvas.height)/2
-    SCALE = CLICK_DIST*5*user_scale_change
+    CLICK_DIST = 0.001*(ctx.canvas.width + ctx.canvas.height)/2
+    SCALE = CLICK_DIST*50*user_scale_change
 }
 
 function drawCircles() {
@@ -126,6 +126,37 @@ function mouseUp(e){
 function updateSize(size){
     user_scale_change = 1 + 2*(size-50)/100
     setRadii()
+    drawCircles()
+}
+
+function arrowClick(val){
+    switch(val){
+        case 1:
+            red.y -= CLICK_DIST
+            break
+        case 2:
+            red.y += CLICK_DIST
+            break
+        case 3:
+            red.x -= CLICK_DIST
+            break
+        case 4:
+            red.x += CLICK_DIST
+            break
+        case 5:
+            green.y -= CLICK_DIST
+            break
+        case 6:
+            green.y += CLICK_DIST
+            break
+        case 7:
+            green.x -= CLICK_DIST
+            break
+        case 8:
+            green.x += CLICK_DIST
+        default:
+            break
+    }
     drawCircles()
 }
 
