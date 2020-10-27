@@ -4,8 +4,8 @@ canvas.onmousemove=mouseMove;
 canvas.onmouseup=mouseUp;
 canvas.onmouseout=mouseUp;
 
-canvas.ontouchdown=mouseDown;
-canvas.ontouchmove=mouseMove;
+canvas.ontouchdown=touchDown;
+canvas.ontouchmove=touchMove;
 canvas.ontouchend=mouseUp;
 
 window.onresize = init
@@ -73,16 +73,7 @@ function drawCircles() {
 
 }
 
-function mouseDown(e){
-    e.preventDefault()
-    e.stopPropagation()
-
-    red.isDragging = false
-    green.isDragging = false
-
-    startX = parseInt(e.clientX)
-    startY = parseInt(e.clientY)
-
+function clickStart(startX, startY){
     red_dist_sq = (red.x - startX)**2 + (red.y - startY)**2
     green_dist_sq = (green.x - startX)**2 + (green.y -startY)**2
 
@@ -97,13 +88,32 @@ function mouseDown(e){
     }
 }
 
-function mouseMove(e){
+function mouseDown(e){
     e.preventDefault()
     e.stopPropagation()
 
-    mouseX = parseInt(e.clientX);
-    mouseY = parseInt(e.clientY);
+    red.isDragging = false
+    green.isDragging = false
 
+    startX = parseInt(e.clientX)
+    startY = parseInt(e.clientY)
+
+    clickStart(startX, startY)
+}
+function touchDown(e){
+    e.preventDefault()
+    e.stopPropagation()
+
+    red.isDragging = false
+    green.isDragging = false
+
+    startX = parseInt(e.touches[0].clientX)
+    startY = parseInt(e.touches[0].clientY)
+
+    clickStart(startX, startY)
+}
+
+function move(mouseX, mouseY){
     let dx = mouseX-startX;
     let dy = mouseY-startY;
     startX = mouseX
@@ -118,6 +128,25 @@ function mouseMove(e){
         green.y += dy
     }
     drawCircles()
+
+}
+function mouseMove(e){
+    e.preventDefault()
+    e.stopPropagation()
+
+    mouseX = parseInt(e.clientX);
+    mouseY = parseInt(e.clientY);
+    
+    move(mouseX, mouseY)
+}
+function touchMove(e){
+    e.preventDefault()
+    e.stopPropagation()
+
+    mouseX = parseInt(e.touches[0].clientX);
+    mouseY = parseInt(e.touches[0].clientY);
+    
+    move(mouseX, mouseY)
 }
 
 function mouseUp(e){
