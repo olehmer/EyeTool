@@ -4,6 +4,10 @@ canvas.onmousemove=mouseMove;
 canvas.onmouseup=mouseUp;
 canvas.onmouseout=mouseUp;
 
+canvas.ontouchdown=mouseDown;
+canvas.ontouchmove=mouseMove;
+canvas.ontouchend=mouseUp;
+
 window.onresize = init
 
 let slider = document.getElementById('slider')
@@ -129,7 +133,9 @@ function updateSize(size){
     drawCircles()
 }
 
-function arrowClick(val){
+function arrowClick(e, val){
+    e.preventDefault()
+    e.stopPropagation()
     switch(val){
         case 1:
             red.y -= CLICK_DIST

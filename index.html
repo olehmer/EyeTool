@@ -8,15 +8,15 @@
         Please upgrade to a newer browser.
     </canvas>
 
-    <div class="arrow-up upred arrow" onclick="arrowClick(1)"></div>
-    <div class="arrow-down downred arrow" onclick="arrowClick(2)"></div>
-    <div class="arrow-left leftred arrow" onclick="arrowClick(3)"></div>
-    <div class="arrow-right rightred arrow" onclick="arrowClick(4)"></div>
+    <div class="arrow-up upred arrow" onclick="arrowClick(event, 1)"></div>
+    <div class="arrow-down downred arrow" onclick="arrowClick(event, 2)"></div>
+    <div class="arrow-left leftred arrow" onclick="arrowClick(event, 3)"></div>
+    <div class="arrow-right rightred arrow" onclick="arrowClick(event, 4)"></div>
 
-    <div class="arrow-up upgreen arrow" onclick="arrowClick(5)"></div>
-    <div class="arrow-down downgreen arrow" onclick="arrowClick(6)"></div>
-    <div class="arrow-left leftgreen arrow" onclick="arrowClick(7)"></div>
-    <div class="arrow-right rightgreen arrow" onclick="arrowClick(8)"></div>
+    <div class="arrow-up upgreen arrow" onclick="arrowClick(event, 5)"></div>
+    <div class="arrow-down downgreen arrow" onclick="arrowClick(event, 6)"></div>
+    <div class="arrow-left leftgreen arrow" onclick="arrowClick(event, 7)"></div>
+    <div class="arrow-right rightgreen arrow" onclick="arrowClick(event, 8)"></div>
 
 </div>
 
@@ -57,77 +57,77 @@
 .arrow-up{
   width: 0; 
   height: 0; 
-  border-left: 20px solid transparent;
-  border-right: 20px solid transparent;
+  border-left: 40px solid transparent;
+  border-right: 40px solid transparent;
 }
 .upred{
-  border-bottom: 40px solid red;
+  border-bottom: 80px solid red;
   position:fixed;
-  bottom: 100px;
-  left:50px;
+  bottom: 200px;
+  left:100px;
 }
 .upgreen{
-  border-bottom: 40px solid green;
+  border-bottom: 80px solid green;
   position:fixed;
-  bottom: 100px;
-  right:50px;
+  bottom: 200px;
+  right:100px;
 }
 
 .arrow-down {
   width: 0; 
   height: 0; 
-  border-left: 20px solid transparent;
-  border-right: 20px solid transparent;
+  border-left: 40px solid transparent;
+  border-right: 40px solid transparent;
 }
 .downred{
-  border-top: 40px solid red;
+  border-top: 80px solid red;
   position:fixed;
-  bottom: 10px;
-  left:50px;
+  bottom: 20px;
+  left:100px;
 }
 .downgreen{
-  border-top: 40px solid green;
+  border-top: 80px solid green;
   position:fixed;
-  bottom: 10px;
-  right:50px;
+  bottom: 20px;
+  right:100px;
 }
 
 .arrow-right {
   width: 0; 
   height: 0; 
-  border-top: 20px solid transparent;
-  border-bottom: 20px solid transparent;
+  border-top: 40px solid transparent;
+  border-bottom: 40px solid transparent;
 }
 .rightred{
-  border-left: 40px solid red;
+  border-left: 80px solid red;
   position:fixed;
-  bottom: 55px;
-  left:95px;
+  bottom: 110px;
+  left:190px;
 }
 .rightgreen{
-  border-left: 40px solid green;
+  border-left: 80px solid green;
   position:fixed;
-  bottom: 55px;
-  right:5px;
+  bottom: 110px;
+  right:10px;
 }
 
 .arrow-left {
   width: 0; 
   height: 0; 
-  border-top: 20px solid transparent;
-  border-bottom: 20px solid transparent; 
+  border-top: 40px solid transparent;
+  border-bottom: 40px solid transparent; 
 }
 .leftred {
-  border-right:40px solid red; 
+  border-right:80px solid red; 
   position:fixed;
-  bottom: 55px;
-  left:5px;
+  bottom: 110px;
+  left:10px;
 }
 .leftgreen{
-  border-right:40px solid green; 
+  border-right:80px solid green; 
   position:fixed;
-  bottom: 55px;
-  right:95px;
+  bottom: 110px;
+  right:190px;
 }
 
 </style>
