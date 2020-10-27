@@ -4,9 +4,10 @@ canvas.onmousemove=mouseMove;
 canvas.onmouseup=mouseUp;
 canvas.onmouseout=mouseUp;
 
-canvas.ontouchdown=touchDown;
+canvas.ontouchstart=touchDown;
 canvas.ontouchmove=touchMove;
 canvas.ontouchend=mouseUp;
+canvas.ontouchcancel=mouseUp;
 
 window.onresize = init
 
