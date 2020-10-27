@@ -30,6 +30,11 @@
 <script src="app.js"></script>
 
 <style>
+    div{
+        -webkit-user-select: none; /* Safari */
+        -ms-user-select: none; /* IE 10 and IE 11 */
+        user-select: none; /* Standard syntax */
+    }
     canvas{
         background-color:black;
     }
@@ -40,6 +45,7 @@
         top:0;
         width:100%;
         height:100%;
+        background-color:black;
     }
     div.slidecont{
         position:fixed;

@@ -60,18 +60,19 @@ function resizeCanvas(){
 function drawCircles() {
     ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height)
 
+
     ctx.beginPath()
     ctx.arc(green.x, green.y, green.r, 0, 2*Math.PI)
     ctx.strokeStyle = "green"
     ctx.lineWidth = line_width
     ctx.stroke()
 
+    ctx.globalCompositeOperation = 'lighter'
     ctx.beginPath()
     ctx.arc(red.x, red.y, red.r, 0, 2*Math.PI)
     ctx.strokeStyle = "red"
     ctx.lineWidth = line_width
     ctx.stroke()
-
 }
 
 function clickStart(startX, startY){
@@ -195,5 +196,6 @@ function arrowClick(e, val){
     }
     drawCircles()
 }
+
 
 init()
