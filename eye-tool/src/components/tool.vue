@@ -1,3 +1,20 @@
+<template>
+<div class="container">
+    <div class="slidecont">
+        <input type="range" min="1" max="100" value="50" class="slider" 
+         id="slider" onchange="updateSize(this.value)">
+    </div>
+    <canvas id="canvas">
+        Your browser doesn't support HTML canvas. 
+        Please upgrade to a newer browser.
+    </canvas>
+
+</div>
+</template>
+
+
+<script>
+
 let canvas = document.getElementById('canvas')
 canvas.onmousedown=mouseDown;
 canvas.onmousemove=mouseMove;
@@ -76,8 +93,8 @@ function drawCircles() {
 }
 
 function clickStart(startX, startY){
-    red_dist_sq = (red.x - startX)**2 + (red.y - startY)**2
-    green_dist_sq = (green.x - startX)**2 + (green.y -startY)**2
+    let red_dist_sq = (red.x - startX)**2 + (red.y - startY)**2
+    let green_dist_sq = (green.x - startX)**2 + (green.y -startY)**2
 
     if (red_dist_sq < (red.r + line_width)**2){
         red.isDragging = true
@@ -136,8 +153,8 @@ function mouseMove(e){
     e.preventDefault()
     e.stopPropagation()
 
-    mouseX = parseInt(e.clientX);
-    mouseY = parseInt(e.clientY);
+    let mouseX = parseInt(e.clientX);
+    let mouseY = parseInt(e.clientY);
     
     move(mouseX, mouseY)
 }
@@ -145,8 +162,8 @@ function touchMove(e){
     e.preventDefault()
     e.stopPropagation()
 
-    mouseX = parseInt(e.touches[0].clientX);
-    mouseY = parseInt(e.touches[0].clientY);
+    let mouseX = parseInt(e.touches[0].clientX);
+    let mouseY = parseInt(e.touches[0].clientY);
     
     move(mouseX, mouseY)
 }
@@ -164,38 +181,45 @@ function updateSize(size){
     drawCircles()
 }
 
-function arrowClick(e, val){
-    e.preventDefault()
-    e.stopPropagation()
-    switch(val){
-        case 1:
-            red.y -= CLICK_DIST
-            break
-        case 2:
-            red.y += CLICK_DIST
-            break
-        case 3:
-            red.x -= CLICK_DIST
-            break
-        case 4:
-            red.x += CLICK_DIST
-            break
-        case 5:
-            green.y -= CLICK_DIST
-            break
-        case 6:
-            green.y += CLICK_DIST
-            break
-        case 7:
-            green.x -= CLICK_DIST
-            break
-        case 8:
-            green.x += CLICK_DIST
-        default:
-            break
-    }
-    drawCircles()
-}
-
 
 init()
+
+</script>
+
+<style scoped>
+    div{
+        -webkit-user-select: none; /* Safari */
+        -ms-user-select: none; /* IE 10 and IE 11 */
+        user-select: none; /* Standard syntax */
+    }
+    canvas{
+        background-color:black;
+    }
+    div.container{
+        margin:0;
+        position:fixed;
+        left:0;
+        top:0;
+        width:100%;
+        height:100%;
+        background-color:black;
+    }
+    div.slidecont{
+        position:fixed;
+        top:3px;
+        left:0;
+        width:100%;
+        margin:auto;
+        text-align:center;
+        padding-top: 20px;
+    }
+    .slider{
+        width:80%;
+        height: 20px;
+    }
+
+
+</style>
+
+
+
