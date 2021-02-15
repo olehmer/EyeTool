@@ -1,12 +1,5 @@
 <template>
 <div class="container">
-    <div class="slidecont">
-        <input type="range" min="1" max="100" value="50" class="slider" 
-         v-model="slider" @change="updateSize">
-    </div>
-    <div class="header" v-if="rotate_mode">
-      <h4>rotate mode on</h4>
-    </div>
     <div class="footer">
       <span class="footer">H={{h_offset}} [mm]</span>
       <span class="footer">V={{v_offset}} [mm]</span>
@@ -38,10 +31,8 @@
         green: {},
         startX: 0,
         startY: 0,
-        slider: 50, 
         v_offset: 0,
         h_offset:0,
-        rotate_mode:false,
         green_angle:0,
         red_angle:0
       }
@@ -157,11 +148,6 @@
             return
         }
       },
-      doubleClick(e){
-        e.preventDefault()
-        e.stopPropagation()
-        this.rotate_mode = !this.rotate_mode
-      },
       mouseDown(e){
         e.preventDefault()
         e.stopPropagation()
@@ -205,22 +191,6 @@
         this.v_offset = Math.abs(this.red.y - this.green.y)
         this.h_offset = Math.abs(this.red.x - this.green.x)
       },
-      rotate(mouseX, mouseY){
-        if(this.green.isDragging){
-          let a = Math.sqrt((this.green.x - this.startX)**2 + 
-                   (this.green.y - this.startY)**2)
-          let b = Math.sqrt((this.startX - mouseX)**2 + (this.startY - mouseY)**2)
-
-          var val = 1
-          if(mouseY > this.startY){
-            val = -1
-          }
-          this.green.theta = val*Math.acos((a**2 + this.green.r**2 - 
-                                          b**2)/(2*a*this.green.r))
-          this.green_angle = Math.round(10*180/Math.PI*this.green.theta)/10
-          this.drawCircles()
-        }
-      },
       mouseMove(e){
         e.preventDefault()
         e.stopPropagation()
@@ -228,12 +198,8 @@
         let mouseX = parseInt(e.clientX);
         let mouseY = parseInt(e.clientY);
         
-        if(this.rotate_mode){
-          this.rotate(mouseX, mouseY)
-        }
-        else{
-          this.move(mouseX, mouseY)
-        }
+        
+        this.move(mouseX, mouseY)
       },
       touchMove(e){
         e.preventDefault()
@@ -291,7 +257,7 @@
         top:0;
         width:100%;
         height:100%;
-        background-color:black;
+        background-color:red;
     }
     div.slidecont{
         position:fixed;
