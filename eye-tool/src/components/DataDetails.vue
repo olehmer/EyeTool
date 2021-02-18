@@ -14,7 +14,8 @@
 
   <div class="data-container">
     <div class="data-row" v-for="i in 3" :key="i">
-      <div class="data-entry" v-for="j in 3" :key="j">
+      <div class="data-entry" v-for="j in 3" :key="j" 
+        v-on:click="launcTool(i,j)">
           {{i}},{{j}}
       </div>
 
@@ -38,7 +39,8 @@
     </div>
   </div>
 
-  <Tool v-if="showTool" />
+  <Tool v-if="showTool" :ppi="ppi" :size="size" :colors="colors" :dist="dist"
+    :ind="ind" :data="data"/>
 
 </div>
 </template>
@@ -51,13 +53,13 @@
     components:{
       Tool
     },
-    props: ['dataIn'],
+    props: ['dataIn', 'ppi', 'size', 'colors', 'dist'],
     data() {
       return {
         data: {},
         confirmDelete: false,
         ind: {},
-        showTool:true 
+        showTool:false
       }
     },
     mounted() {
@@ -69,6 +71,11 @@
       },
       closeDetailView(){
         this.$emit('closeDetailView')
+      },
+      launcTool(i,j){
+        this.ind.row = i
+        this.ind.col = j
+        this.showTool = true
       }
     }
   }

@@ -41,7 +41,7 @@
       return {
         canvas: null,
         ctx: null,
-        colors: [[0,255,0], [255,0,0]], 
+        colors: [[0,128,0], [128,0,0]], 
         colorNames: ["Red", "Green", "Blue"],
         size:105,
       }

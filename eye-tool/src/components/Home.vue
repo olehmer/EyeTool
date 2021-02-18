@@ -14,7 +14,7 @@
         future use. You can recalibrate at any time using the same button. </p>
     </div>
 
-    <div class="data-holder" v-if="!calibrated">
+    <div class="data-holder" v-if="calibrated">
       <div class="button" v-on:click="addDataEntry">Add Data Entry</div>
 
       <div class="table-holder">
@@ -37,7 +37,7 @@
              @calibrationDone="calibrationEnded()"/>
  
   <DataDetails class="data-details-container" v-if="dataDetails"
-    :dataIn="currentData"
+    :dataIn="currentData" :ppi="ppi" :size="size" :colors="colors" :dist="dist"
     @deleteEntry="deleteCurrentEntry"
     @closeDetailView="dataDetails = false"/>
   
@@ -68,21 +68,25 @@
         data: [],
         currentIndex: null,
         currentData: null,
-        dataDetails: false
+        dataDetails: false,
+        cname: "cal"
       }
     },
     mounted() {
       //read cookies and adjust parameters as needed
+      if(document.cookie.length >0){
+        let decoded = decodeURIComponent(document.cookie)
+        let cal = JSON.parse(decoded.split("=")[1])
+        this.ppi = cal.ppi
+        this.colors = cal.colors
+        this.size = cal.size
+        this.dist = cal.dist
+        this.calibrated = true
+      }
+
+      this.addDataEntry()
+      this.data[0].name = "dummy entry"
       
-      var one = {}
-      one.name = "first entry"
-
-      var two = {}
-      two.name = "second entry"
-
-      var t = {}
-      t.name = "third entry"
-      this.data = [one, two, t]
 
     },
     computed:{
@@ -97,6 +101,7 @@
         if(this.ppi !== null && this.colors !== null &&
            this.size !== null && this.dist !== null){
           this.calibrated = true
+          this.saveCalibration() //store it in a cookie
         }
       },
       addDataEntry(){
@@ -104,6 +109,12 @@
         var newEntry = {}
         newEntry.name = null
         newEntry.data = [[null,null,null],[null,null,null],[null,null,null]]
+          /*
+        for(var i=0; i<3; i++){
+          for(var j=0; j<3; j++){
+
+          }
+          }*/
         
         this.data.push(newEntry)
         this.showDataDetails(this.data.length - 1)
@@ -116,6 +127,21 @@
       deleteCurrentEntry(){
         this.data.splice(this.currentIndex, 1)
         this.dataDetails = false
+      },
+      saveCalibration(){
+        let cal = {}
+        cal.ppi = this.ppi
+        cal.colors = this.colors
+        cal.size = this.size
+        cal.dist = this.dist
+
+        let val = encodeURIComponent(JSON.stringify(cal))
+
+        var d = new Date()
+        d.setTime(d.getTime() + (1000*24*60*60*1000)) //1000 days!
+        var expires = "expires="+ d.toUTCString()
+          document.cookie = "cal=" + val + ";" + expires + 
+            ";samesite=Strict; secure; path=/"
       }
     }
   }

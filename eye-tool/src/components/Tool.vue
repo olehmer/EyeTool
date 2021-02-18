@@ -1,8 +1,14 @@
 <template>
 <div class="container">
     <div class="footer">
-      <span class="footer">H={{h_offset}} [mm]</span>
-      <span class="footer">V={{v_offset}} [mm]</span>
+      <span class="footer">
+        H={{h_offset}} [mm]
+      </span>
+      <span class="footer">
+        V={{v_offset}} [mm]
+      </span>
+
+
     </div>
     <canvas id="canvas">
         Your browser doesn't support HTML canvas. 
@@ -16,25 +22,30 @@
 <script>
 
   export default{
-    props:['hIn', 'vIn', 'ppiIn', 'colorsIn', 'sizeIn', 'distIn'],
+    props:['ind', 'ppi', 'colors', 'size', 'dist', 'data'],
     data() {
       return {
         canvas: null,
         ctx: null,
-        SCALE: 0,
         CLICK_DIST: 0,
-        user_scale_change: 1,
-        line_width: 0,
-        DEFAULT_LINE: 15,
         red: {},
         green: {},
         startX: 0,
         startY: 0,
         v_offset: 0,
         h_offset:0,
+        dragging: false,
+        dragged: false
       }
     },
     mounted() {
+      if(this.data.data[this.ind.row][this.ind.col] === null){
+        let newMeasurement = {}
+        newMeasurement.v = 0
+        newMeasurement.h = 0
+        newMeasurement.x = 0
+        this.data.data[this.ind.row][this.ind.col] = newMeasurement
+      }
 
       this.setupCanvas()
       this.init()
@@ -63,115 +74,82 @@
 
         this.red.x = this.ctx.canvas.width/2
         this.red.y = this.ctx.canvas.height/2
-        this.red.theta = 0
-        this.red.isDragging = false
 
         this.green.x = this.ctx.canvas.width/2
         this.green.y = this.ctx.canvas.height/2
-        this.green.theta = 0
-        this.green.isDragging = false
 
-        this.h_offset = 0
-        this.v_offset = 0
+        this.updateData()
 
-        this.slider = 50
-        this.updateSize()
-      },
-      setRadii(){
-        this.red.r = this.SCALE*this.user_scale_change
-        this.green.r = this.red.r + this.DEFAULT_LINE*this.user_scale_change
+        this.ctx.globalCompositeOperation = 'lighter'
 
-        this.line_width = this.DEFAULT_LINE*this.user_scale_change
+        this.drawCircles()
       },
       resizeCanvas(){
         this.ctx.canvas.width = window.innerWidth;
         this.ctx.canvas.height = window.innerHeight;
 
         this.CLICK_DIST = 0.001*(this.ctx.canvas.width + this.ctx.canvas.height)/2
-        this.SCALE = this.CLICK_DIST*50*this.user_scale_change
       },
       drawCircles() {
         this.ctx.clearRect(0, 0, this.ctx.canvas.width, this.ctx.canvas.height)
 
+        
         this.ctx.beginPath()
-        this.ctx.arc(this.green.x, this.green.y, this.green.r, 0, 2*Math.PI)
-        this.ctx.moveTo(this.green.x - this.green.r, 
+        this.ctx.arc(this.green.x, this.green.y, this.size, 0, 2*Math.PI)
+        this.ctx.moveTo(this.green.x - this.size, 
                         this.green.y) 
-        this.ctx.lineTo(this.green.x - this.green.r, 
+        this.ctx.lineTo(this.green.x - this.size, 
                         this.green.y)
-        this.ctx.strokeStyle = "green"
-        this.ctx.lineWidth = this.line_width
+        this.ctx.strokeStyle = `rgb(${this.colors[0][0]}, ${this.colors[0][1]}, 
+                                  ${this.colors[0][2]})`
+        this.ctx.lineWidth = this.size/2 //this.line_width
         this.ctx.stroke()
 
-        this.ctx.globalCompositeOperation = 'lighter'
-
+        //draw the red circle
         this.ctx.beginPath()
-        this.ctx.arc(this.red.x, this.red.y, this.red.r, 0, 2*Math.PI)
-        this.ctx.moveTo(this.red.x - this.red.r, 
-                        this.red.y) 
-        this.ctx.lineTo(this.red.x - this.red.r, 
-                        this.red.y)
-
-        this.ctx.strokeStyle = "red"
-        this.ctx.lineWidth = this.line_width
-        this.ctx.stroke()
-      },
-      clickStart(startX, startY){
-        let red_dist_sq = (this.red.x - startX)**2 + (this.red.y - startY)**2
-        let green_dist_sq = (this.green.x - startX)**2 + (this.green.y -startY)**2
-
-        if (red_dist_sq < (this.red.r + this.line_width)**2){
-            this.red.isDragging = true
-            return
-        }
-
-        if (green_dist_sq < (this.green.r + this.line_width)**2){
-            this.green.isDragging = true
-            return
-        }
+        this.ctx.arc(this.red.x, this.red.y, this.size/2, 0, 2*Math.PI)
+        this.ctx.fillStyle = `rgb(${this.colors[1][0]}, ${this.colors[1][1]}, 
+                                  ${this.colors[1][2]})`
+        this.ctx.fill()
       },
       mouseDown(e){
         e.preventDefault()
         e.stopPropagation()
 
-        this.red.isDragging = false
-        this.green.isDragging = false
+        this.dragging = true
 
         this.startX = parseInt(e.clientX)
         this.startY = parseInt(e.clientY)
-
-        this.clickStart(this.startX, this.startY)
       },
       touchDown(e){
         e.preventDefault()
         e.stopPropagation()
 
-        this.red.isDragging = false
-        this.green.isDragging = false
-
+        if(e.touches.length > 1){
+          this.dragging = true
+        }
         this.startX = parseInt(e.touches[0].clientX)
         this.startY = parseInt(e.touches[0].clientY)
-
-        this.clickStart(this.startX, this.startY)
       },
       move(mouseX, mouseY){
         let dx = mouseX-this.startX;
         let dy = mouseY-this.startY;
+
+        if(Math.abs(dx) > 0 || Math.abs(dy) > 0){
+          this.dragged = true
+        }
+
         this.startX = mouseX
         this.startY = mouseY
 
-        if (this.red.isDragging){
-            this.red.x += dx
-            this.red.y += dy
-        }
-        if (this.green.isDragging){
-            this.green.x += dx
-            this.green.y += dy
-        }
-        this.drawCircles()
+        if(this.dragging){
+          this.green.x += dx
+          this.green.y += dy
 
-        this.v_offset = Math.abs(this.red.y - this.green.y)
-        this.h_offset = Math.abs(this.red.x - this.green.x)
+          this.drawCircles()
+
+          this.updateData()
+        }
       },
       mouseMove(e){
         e.preventDefault()
@@ -179,7 +157,6 @@
 
         let mouseX = parseInt(e.clientX);
         let mouseY = parseInt(e.clientY);
-        
         
         this.move(mouseX, mouseY)
       },
@@ -195,13 +172,32 @@
       mouseUp(e){
         e.preventDefault()
         e.stopPropagation()
-        this.red.isDragging = false
-        this.green.isDragging = false
+
+        
+
+        //TODO, if mouse didn't move, move the click distance
+        /*
+        if(!this.dragged){
+          let dx = this.startX - this.green.x
+          let dy = this.startY - this.green.y
+          let alpha = Math.PI/2 - Math.atan(dx/dy)
+        }*/
+
+        this.dragging = false
+        this.dragged = false
+
       },
-      updateSize(){
-        this.user_scale_change = 1 + 2*(this.slider-50)/100
-        this.setRadii()
-        this.drawCircles()
+      updateData(){
+        let v_offset = Math.abs(this.red.y - this.green.y)
+        let h_offset = Math.abs(this.red.x - this.green.x)
+
+        this.data.data[this.ind.row][this.ind.col].v = v_offset/this.ppi*25.4
+        this.data.data[this.ind.row][this.ind.col].h = h_offset/this.ppi*25.4
+
+        this.h_offset = 
+            Math.round(this.data.data[this.ind.row][this.ind.col].h*10)/10
+        this.v_offset =
+            Math.round(this.data.data[this.ind.row][this.ind.col].v*10)/10
       }
     }
   }

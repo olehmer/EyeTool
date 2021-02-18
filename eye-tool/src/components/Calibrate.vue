@@ -29,7 +29,7 @@ export default {
   data() {
     return {
       ppi: null,
-      colors:[[0,255,0],[255,0,0]],
+      colors:[[0,128,0],[128,0,0]],
       size: null,
       dist: null,
       view: 1,
