@@ -1,150 +1,109 @@
 <template>
-<div class="container">
-    <h2>Calibrate Screen Pixel Density</h2>
-
-    <h3 class="selector" v-bind:class="{active: method==0}"
-      v-on:click="setMethod(0)">Enter PPI</h3>
-    <h3 class="selector" v-bind:class="{active: method==1}"
-      v-on:click="setMethod(1)">Manual</h3>
-
-    <div class="method" v-if="method==0">
-      <p>The pixels per inch (PPI) of the screen is:</p>
-      <input v-model="ppi" placeholder="pixels per inch" v-on:input="updateWidth">
-      <span style="padding-left:10px;">PPI.</span> 
-      <p>If the PPI is correct, the red line below should measure exactly 25.4
-        mm (1 inch) in width.  Note that mobile phones may require you to enter
-        the dots per inch (DPI) instead of PPI. A common PPI for 1080p computer
-        screens is 96. If you're unsure, use the "Manual" button above to
-        manually calibrate.</p>
+  <div class="content-view">
+    <h3>Calibration (step {{view}} of 3)</h3>
+    <div class="button top-left" v-if="view>1" v-on:click="view--">Back</div>
+    <div class="button top-right" v-if="canContinue[view-1]" 
+      v-on:click="view<3?view++:calibrationDone()">
+      {{view==3?"Done":"Next"}}
     </div>
 
-    <div class="method" v-if="method==1">
-      <p>Using a ruler, the red line below is: </p>
-      <input v-model="line_width" placeholder="line width in mm" 
-        v-on:input="updatePPI">
-      <span style="padding-left:10px;">millimeters wide.</span>
-      <p>The PPI/DPI of your screen is: {{ppi}}</p>
-    </div>
-
-    <canvas id="canvas_ppi">
-        Your browser doesn't support HTML canvas. 
-        Please upgrade to a newer browser.
-    </canvas>
-
-</div>
+    <PPI v-if="view==1" :ppiIn="ppiIn" @setPPI="updatePPI($event)"/>
+    <Colors v-if="view==2" :colorsIn="colors" :sizeIn="size" 
+        @setColors="updateColors($event)" @setSize="updateSize($event)"/>
+    <Distance v-if="view==3" :distIn="dist" @setDistance="updateDist($event)"/>
+  </div>
 </template>
 
-
 <script>
+import PPI from './PPI.vue'
+import Colors from './Colors.vue'
+import Distance from './Distance.vue'
 
-  export default{
-    props: ["ppiIn"],
-    data() {
-      return {
-        canvas: null,
-        ctx: null,
-        ppi: null,
-        ppi_default: 96,
-        line_width: null,
-        method:0
+export default {
+  components: {
+    PPI,
+    Colors,
+    Distance
+  },
+  props: ["ppiIn", "sizeIn", "colorsIn", "distIn"],
+  data() {
+    return {
+      ppi: null,
+      colors:[[0,255,0],[255,0,0]],
+      size: null,
+      dist: null,
+      view: 1,
+      canContinue: [false, true, false]
+    }
+  },
+  mounted() {
+    this.ppi = this.ppiIn
+    this.size = this.sizeIn
+    if(this.colorsIn !== null){
+      this.colors = this.colorsIn
+    }
+    this.dist = this.distIn
+
+    //update which pages can be skipped
+    if(this.ppi !== null && this.ppi>0){
+      this.canContinue[0] = true
+    }
+    if(this.dist !== null){
+      this.canContinue[2] = true
+    }
+  },
+  methods: {
+    updatePPI(p){
+      //emit the ppi
+      this.ppi = p
+      this.$emit("setPPI", p)
+      if(this.ppi >0 && this.ppi !== null){
+        this.canContinue[0] = true
+      }
+      else{
+        this.canContinue[0] = false
       }
     },
-    mounted() {
-      this.ppi = this.ppiIn
-      this.setupCanvas()
-      this.init()
+    updateSize(s){
+      //emit the size
+      this.size = s
+      this.$emit("setSize", s)
     },
-    methods: {
-      setMethod(inpt){
-          this.method = inpt
-          if(inpt == 1){
-            this.setupCanvas()
-            this.init()
-          }
-      },
-      setupCanvas(){
-        this.canvas = document.getElementById('canvas_ppi')
+    updateColors(c){
+      //emit the colors
+      this.colors = c
+      this.$emit("setColors", c)
+    },
+    updateDist(d){
+      //emit the distance
+      this.dist = d
+      this.$emit("setDistance", d)
 
-        window.onresize = this.init
-
-        this.ctx = this.canvas.getContext('2d')
-
-      },
-      init(){
-        //resize canvas just in case
-        this.ctx.canvas.width = window.innerWidth/2;
-        this.ctx.canvas.height = 20
-
-        let line = {}
-        line.x = 0
-        line.y = this.ctx.canvas.height/2
-
-        //clear the canvas, just in case
-        this.ctx.clearRect(0, 0, this.ctx.canvas.width, this.ctx.canvas.height)
-
-        //draw the line
-        this.ctx.beginPath()
-        this.ctx.moveTo(line.x, line.y) 
-        let w = this.ppi
-        if (w === null || w <=0){
-          w = this.ppi_default 
-        }
-        this.ctx.lineTo(w, line.y)
-        this.ctx.strokeStyle = "red"
-        this.ctx.lineWidth = 5
-        this.ctx.stroke()
-      },
-      updateWidth(){
-        this.init()
-        this.$emit('setPPI', this.ppi)
-      },
-      updatePPI(){
-        //25.4 mm per inch
-        if(this.line_width > 0){
-          this.ppi = Math.round(this.ppi_default/(this.line_width)*25.4)
-          this.$emit('setPPI', this.ppi)
-        }
-        else{
-          this.ppi = null
-        }
+      if(this.dist > 0 && this.dist !== null){
+        this.canContinue[2] = true
       }
+      else{
+        this.canContinue[2] = false
+      }
+    },
+    calibrationDone(){
+      this.$emit("calibrationDone")
     }
   }
-
+}
 </script>
 
-<style scoped>
-    canvas{
-        margin-top:10px;
-        background-color:white;
-        display:block;
-        margin-left:auto;
-        margin-right:auto;
-    }
-    div.container{
-        margin:0px;
-        width:100%;
+<style>
+#app {
+  font-family: Avenir, Helvetica, Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
 
-        color:black;
-        text-align:center;
-    }
-    div.method{
-      padding:20px;
-      text-align:left;
-      margin-left:auto;
-      margin-right:auto;
-    }
-    h3.selector{
-      display:inline-block;
-      color:gray;
-      margin:10px;
-      cursor:pointer
-    }
-    h3.selector.active{
-      color:black;
-      text-decoration: underline;
-    }
-
-
+div.content-view {
+  width:100%;
+  margin-top:20px;
+  padding-top:5px;
+}
 
 </style>

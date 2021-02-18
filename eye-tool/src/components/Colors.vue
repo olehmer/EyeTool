@@ -1,7 +1,7 @@
 <template>
 <div class="container">
 
-  <h2>Adjust Colors and Size for Your Glasses and Screen</h2>
+  <h3>Adjust Colors and Size for Your Glasses and Screen</h3>
 
   <canvas id="canvas_color">
       Your browser doesn't support HTML canvas. 
@@ -11,7 +11,7 @@
   <div>
     <div class="slide-cont">
       <p>Set the size of the circles:</p>
-      <input type="range" min="0" max="200" v-model="size" 
+      <input type="range" min="10" max="200" v-model="size" 
           v-on:input="drawCircles()">
     </div>
   </div>
@@ -43,7 +43,7 @@
         ctx: null,
         colors: [[0,255,0], [255,0,0]], 
         colorNames: ["Red", "Green", "Blue"],
-        size:100,
+        size:105,
       }
     },
     mounted() {
@@ -111,7 +111,6 @@
 
 <style scoped>
     div.container{
-        border:1px solid black;
         text-align:center;
     }
     canvas{

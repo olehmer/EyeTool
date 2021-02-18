@@ -3,8 +3,6 @@
     <div class="footer">
       <span class="footer">H={{h_offset}} [mm]</span>
       <span class="footer">V={{v_offset}} [mm]</span>
-      <span class="footer" style="color:red;">&theta;={{red_angle}}&deg;</span>
-      <span class="footer" style="color:green;">&theta;={{green_angle}}&deg;</span>
     </div>
     <canvas id="canvas">
         Your browser doesn't support HTML canvas. 
@@ -238,40 +236,27 @@
       bottom:10px;
       width:100%;
     }
-    div.header{
-      color:white;
-      position:fixed;
-      top:10px;
-      width:100%;
-    }
     span.footer{
       padding:15px;
     }
     canvas{
+        position:absolute;
+        top:0;
+        left:0;
+        margin:0;
+        padding:0;
         background-color:black;
     }
     div.container{
         margin:0;
+        padding:0;
         position:fixed;
         left:0;
         top:0;
         width:100%;
         height:100%;
         background-color:red;
+        z-index:400;
     }
-    div.slidecont{
-        position:fixed;
-        top:3px;
-        left:0;
-        width:100%;
-        margin:auto;
-        text-align:center;
-        padding-top: 20px;
-    }
-    .slider{
-        width:80%;
-        height: 20px;
-    }
-
 
 </style>
