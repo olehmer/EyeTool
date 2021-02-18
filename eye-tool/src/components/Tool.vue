@@ -1,7 +1,7 @@
 <template>
 <div class="container">
 
-  <div class="button top-center" style="z-index:401;" v-on:click="closeTool">
+  <div class="button top-right" style="z-index:401;" v-on:click="closeTool">
     Done
   </div>
 

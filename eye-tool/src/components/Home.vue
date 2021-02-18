@@ -281,11 +281,9 @@
     top:10px;
     right:10px;
   }
-  div.top-center{
+  div.bottom-right{
     position:fixed;
-    top:10px;
-    left:50%;
-    width:40px;
-    margin-left:-20px;
+    bottom:10px;
+    right:10px;
   }
 </style>
