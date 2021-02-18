@@ -136,8 +136,8 @@
       downloadData(){
         var time = new Date();
         var text = "Downloaded: " + time + "\n\n"
-        text += "V is the vertical offset in milimeters.\n"
-        text += "H is the horizontal offset in milimeters.\n"
+        text += "V is the vertical offset in millimeters.\n"
+        text += "H is the horizontal offset in millimeters.\n"
         text += "PD is the offset in prism dioptres.\n\n"
 
         text += "Viewing distance was: " + this.dist + " meters.\n\n"

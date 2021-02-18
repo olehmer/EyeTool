@@ -2,7 +2,7 @@
   <div class="content-view">
     <h3>Calibration (step {{view}} of 3)</h3>
     <div class="button top-left" v-if="view>1" v-on:click="view--">Back</div>
-    <div class="button top-right" v-if="canContinue[view-1]" 
+    <div class="button top-right" v-if="canContinue()" 
       v-on:click="view<3?view++:calibrationDone()">
       {{view==3?"Done":"Next"}}
     </div>
@@ -33,7 +33,6 @@ export default {
       size: null,
       dist: null,
       view: 1,
-      canContinue: [false, true, false]
     }
   },
   mounted() {
@@ -43,16 +42,17 @@ export default {
       this.colors = this.colorsIn
     }
     this.dist = this.distIn
-
-    //update which pages can be skipped
-    if(this.ppi !== null && this.ppi>0){
-      this.canContinue[0] = true
-    }
-    if(this.dist !== null){
-      this.canContinue[2] = true
-    }
   },
   methods: {
+    canContinue(){
+      if(this.view == 1 && this.ppi !== null && this.ppi >0) return true
+
+      if(this.view == 2) return true
+
+      if(this.view == 3 && this.dist !== null && this.dist >0) return true
+
+      return false
+    },
     updatePPI(p){
       //emit the ppi
       this.ppi = p

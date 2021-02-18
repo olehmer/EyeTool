@@ -40,8 +40,8 @@
     </div>
   </div>
 
-  <p class="data">V is the measured vertical offset in milimeters.</p>
-  <p class="data">H is the measured horizontal offset in milimeters.</p>
+  <p class="data">V is the measured vertical offset in millimeters.</p>
+  <p class="data">H is the measured horizontal offset in millimeters.</p>
   <p class="data">PD is the measured offset in prism dioptres.</p>
 
 
@@ -159,15 +159,16 @@
     }
 
     div.delete-buttons{
+      position:absolute;
+      bottom:15px;
       display:inline-block;
-      width:55px;
-      margin-top:15px;
+      width:50px;
     }
     div.cancel{
-      margin-right:50px;
+      left:15px;
     }
     div.yes{
-      margin-left:50px;
+      right:15px;
     }
 
     div.data-container{
@@ -194,7 +195,9 @@
     p.corner-label{
       position:absolute;
       top:-5px;
-      left:5px;
+      left:0px;
+      width:100%;
+      text-align:center;
       font-size:0.8em;
       color:gray;
     }
