@@ -86,15 +86,20 @@
 
         //draw the green circle
         this.ctx.beginPath()
-        this.ctx.arc(w/4, h/2, this.size, 0, 2*Math.PI)
-        this.ctx.fillStyle = `rgb(${this.colors[0][0]}, ${this.colors[0][1]}, 
-                                  ${this.colors[0][2]})`
-        this.ctx.fill()
+        this.ctx.arc(w/2, h/2, this.size, 0, 2*Math.PI)
+        this.ctx.moveTo(w/2 - this.size, h/2) 
+        this.ctx.lineTo(w/2 - this.size, h/2)
+        this.ctx.strokeStyle = `rgb(${this.colors[0][0]}, 
+                                    ${this.colors[0][1]}, 
+                                    ${this.colors[0][2]})`
+        this.ctx.lineWidth = this.size/2 
+        this.ctx.stroke()
 
         //draw the red circle
         this.ctx.beginPath()
-        this.ctx.arc(3*w/4, h/2, this.size, 0, 2*Math.PI)
-        this.ctx.fillStyle = `rgb(${this.colors[1][0]}, ${this.colors[1][1]}, 
+        this.ctx.arc(w/2, h/2, this.size/2, 0, 2*Math.PI)
+        this.ctx.fillStyle = `rgb(${this.colors[1][0]}, 
+                                  ${this.colors[1][1]}, 
                                   ${this.colors[1][2]})`
         this.ctx.fill()
 

@@ -5,12 +5,18 @@
     Delete Entry
   </div>
 
-  <div class="button top-right" v-on:click="closeDetailView">
+  <div class="button top-right" v-on:click="closeDetailView" 
+    v-if="dataAll.name && dataAll.name.length > 0">
     Done
   </div>
 
 
-  <input v-model="dataAll.name" placeholder="name this dataset">
+  <input class="text" v-model="dataAll.name" placeholder="name this dataset">
+
+  <div class="check-holder">
+    <input class="check" type="checkbox" id="checkbox" v-model="inverted">
+    <label for="checkbox">Invert colors</label>
+  </div>
 
   <div class="data-container" v-if="dataAll.data !== undefined">
     <div class="data-row" v-for="i in 3" :key="i">
@@ -56,7 +62,8 @@
   </div>
 
   <Tool v-if="showTool" :ppi="ppi" :size="size" :colors="colors" :dist="dist"
-    :ind="ind" :data="dataAll" @closeTool="showTool = false"/>
+    :ind="ind" :data="dataAll" :invert="inverted" 
+    @closeTool="showTool = false"/>
 
 </div>
 </template>
@@ -75,7 +82,8 @@
         dataAll: {},
         confirmDelete: false,
         ind: {},
-        showTool:false
+        showTool:false,
+        inverted: false,
       }
     },
     mounted() {
@@ -109,13 +117,16 @@
         padding-right:20px;
     }
 
-    input{
+    input.text{
       width:80%;
       max-width:500px;
       padding:5px;
       text-align:center;
       font-size:1.2em;
       margin-top:50px;
+    }
+    input.check{
+      margin:5px;
     }
 
     div.confirm-delete-container{
@@ -199,6 +210,8 @@
       text-align:left;
     }
 
-
+    div.check-holder{
+      margin-top:20px;
+    }
 
 </style>

@@ -20,7 +20,8 @@
       <div class="table-holder">
         <div class="table-row" v-for="(row, index) in dataReversed" 
           :key="index" 
-          v-on:click="showDataDetails(index)" v-bind:class="{odd: (index+1)%2}">
+          v-on:click="showDataDetails(data.length -1 - index)" 
+          v-bind:class="{odd: (index+1)%2}">
           <p>{{row.name}}</p>
         </div>
       </div>
@@ -83,11 +84,6 @@
         this.dist = cal.dist
         this.calibrated = true
       }
-
-      this.addDataEntry()
-      this.data[0].name = "dummy entry"
-      
-
     },
     computed:{
       dataReversed: function(){
@@ -107,14 +103,8 @@
       addDataEntry(){
         //show the data view page
         var newEntry = {}
-        newEntry.name = null
+        newEntry.name = ""
         newEntry.data = [[{},{},{}],[{},{},{}],[{},{},{}]]
-          /*
-        for(var i=0; i<3; i++){
-          for(var j=0; j<3; j++){
-
-          }
-          }*/
         
         this.data.push(newEntry)
         this.showDataDetails(this.data.length - 1)

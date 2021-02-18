@@ -31,7 +31,7 @@
 <script>
 
   export default{
-    props:['ind', 'ppi', 'colors', 'size', 'dist', 'data'],
+    props:['ind', 'ppi', 'colors', 'size', 'dist', 'data', 'invert'],
     data() {
       return {
         canvas: null,
@@ -46,7 +46,9 @@
         pd: 0,
         dragging: false,
         dragged: false,
-        preset: false
+        preset: false,
+        gc: 0,
+        rc: 1,
       }
     },
     mounted() {
@@ -62,6 +64,11 @@
         this.green.x = this.data.data[this.ind.row][this.ind.col].x
         this.green.y = this.data.data[this.ind.row][this.ind.col].y
         this.preset = true
+      }
+
+      if(this.invert){
+        this.gc = 1
+        this.rc = 0
       }
 
       this.setupCanvas()
@@ -119,16 +126,18 @@
                         this.green.y) 
         this.ctx.lineTo(this.green.x - this.size, 
                         this.green.y)
-        this.ctx.strokeStyle = `rgb(${this.colors[0][0]}, ${this.colors[0][1]}, 
-                                  ${this.colors[0][2]})`
+        this.ctx.strokeStyle = `rgb(${this.colors[this.gc][0]}, 
+                                    ${this.colors[this.gc][1]}, 
+                                    ${this.colors[this.gc][2]})`
         this.ctx.lineWidth = this.size/2 //this.line_width
         this.ctx.stroke()
 
         //draw the red circle
         this.ctx.beginPath()
         this.ctx.arc(this.red.x, this.red.y, this.size/2, 0, 2*Math.PI)
-        this.ctx.fillStyle = `rgb(${this.colors[1][0]}, ${this.colors[1][1]}, 
-                                  ${this.colors[1][2]})`
+        this.ctx.fillStyle = `rgb(${this.colors[this.rc][0]}, 
+                                  ${this.colors[this.rc][1]}, 
+                                  ${this.colors[this.rc][2]})`
         this.ctx.fill()
       },
       mouseDown(e){
@@ -144,7 +153,7 @@
         e.preventDefault()
         e.stopPropagation()
 
-        if(e.touches.length > 1){
+        if(e.touches.length >= 1){ //TODO, update touches?
           this.dragging = true
         }
         this.startX = parseInt(e.touches[0].clientX)
