@@ -16,6 +16,7 @@
 <script>
 
   export default{
+    props:['hIn', 'vIn', 'ppiIn', 'colorsIn', 'sizeIn', 'distIn'],
     data() {
       return {
         canvas: null,
@@ -31,11 +32,10 @@
         startY: 0,
         v_offset: 0,
         h_offset:0,
-        green_angle:0,
-        red_angle:0
       }
     },
     mounted() {
+
       this.setupCanvas()
       this.init()
     },
@@ -46,13 +46,11 @@
         this.canvas.onmousemove=this.mouseMove;
         this.canvas.onmouseup=this.mouseUp;
         this.canvas.onmouseout=this.mouseUp;
-        this.canvas.ondblclick=this.doubleClick;
 
         this.canvas.ontouchstart=this.touchDown;
         this.canvas.ontouchmove=this.touchMove;
         this.canvas.ontouchend=this.mouseUp;
         this.canvas.ontouchcancel=this.mouseUp;
-        this.canvas.ondblclick=this.doubleClick;
 
 
         window.onresize = this.init
@@ -92,41 +90,27 @@
         this.CLICK_DIST = 0.001*(this.ctx.canvas.width + this.ctx.canvas.height)/2
         this.SCALE = this.CLICK_DIST*50*this.user_scale_change
       },
-      getXAndYChangeFromTheta(theta, rad){
-        let rho = (Math.PI - theta)/2
-        let alpha = rad*Math.sin(theta)/Math.sin(rho)
-        let phi = Math.PI/2 - rho
-        let dx = rho!=0?Math.sin(phi)*alpha:rad*2
-        let dy = rho!=0?Math.sin(rho)*alpha:0
-        return [dx, dy]
-      },
       drawCircles() {
         this.ctx.clearRect(0, 0, this.ctx.canvas.width, this.ctx.canvas.height)
 
-        let gds = this.getXAndYChangeFromTheta(this.green.theta, this.green.r)
-        let gde = this.getXAndYChangeFromTheta(this.green.theta + Math.PI, 
-                                               this.green.r)
         this.ctx.beginPath()
         this.ctx.arc(this.green.x, this.green.y, this.green.r, 0, 2*Math.PI)
-        this.ctx.moveTo(this.green.x + gds[0] - this.green.r, 
-                        this.green.y + gds[1]) 
-        this.ctx.lineTo(this.green.x + gde[0] - this.green.r, 
-                        this.green.y + gde[1])
+        this.ctx.moveTo(this.green.x - this.green.r, 
+                        this.green.y) 
+        this.ctx.lineTo(this.green.x - this.green.r, 
+                        this.green.y)
         this.ctx.strokeStyle = "green"
         this.ctx.lineWidth = this.line_width
         this.ctx.stroke()
 
         this.ctx.globalCompositeOperation = 'lighter'
 
-        let rds = this.getXAndYChangeFromTheta(this.red.theta, this.red.r)
-        let rde = this.getXAndYChangeFromTheta(this.red.theta + Math.PI, 
-                                               this.red.r)
         this.ctx.beginPath()
         this.ctx.arc(this.red.x, this.red.y, this.red.r, 0, 2*Math.PI)
-        this.ctx.moveTo(this.red.x + rds[0] - this.red.r, 
-                        this.red.y + rds[1]) 
-        this.ctx.lineTo(this.red.x + rde[0] - this.red.r, 
-                        this.red.y + rde[1])
+        this.ctx.moveTo(this.red.x - this.red.r, 
+                        this.red.y) 
+        this.ctx.lineTo(this.red.x - this.red.r, 
+                        this.red.y)
 
         this.ctx.strokeStyle = "red"
         this.ctx.lineWidth = this.line_width
@@ -235,12 +219,13 @@
       position:fixed;
       bottom:10px;
       width:100%;
+      z-index:4001;
     }
     span.footer{
       padding:15px;
     }
     canvas{
-        position:absolute;
+        position:fixed;
         top:0;
         left:0;
         margin:0;
