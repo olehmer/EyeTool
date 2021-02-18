@@ -10,17 +10,33 @@
   </div>
 
 
-  <input v-model="data.name" placeholder="name this dataset">
+  <input v-model="dataAll.name" placeholder="name this dataset">
 
-  <div class="data-container">
+  <div class="data-container" v-if="dataAll.data !== undefined">
     <div class="data-row" v-for="i in 3" :key="i">
       <div class="data-entry" v-for="j in 3" :key="j" 
-        v-on:click="launcTool(i,j)">
-          {{i}},{{j}}
+        v-on:click="launcTool(i-1,j-1)">
+        <p class="corner-label">{{i}},{{j}}</p>
+
+        <div class="show-data-values">
+          <p class="data">
+            V: {{dataAll.data[i-1][j-1]?dataAll.data[i-1][j-1].v:"--"}}
+           </p>
+          <p class="data">
+            H: {{dataAll.data[i-1][j-1]?dataAll.data[i-1][j-1].h:"--"}}
+          </p>
+          <p class="data">
+            PD: {{dataAll.data[i-1][j-1]?dataAll.data[i-1][j-1].pd:"--"}}
+          </p>
+        </div>
       </div>
 
     </div>
   </div>
+
+  <p class="data">V is the measured vertical offset in milimeters.</p>
+  <p class="data">H is the measured horizontal offset in milimeters.</p>
+  <p class="data">PD is the measured offset in prism dioptres.</p>
 
 
   <div class="confirm-delete-container" v-if="confirmDelete"></div>
@@ -40,7 +56,7 @@
   </div>
 
   <Tool v-if="showTool" :ppi="ppi" :size="size" :colors="colors" :dist="dist"
-    :ind="ind" :data="data"/>
+    :ind="ind" :data="dataAll" @closeTool="showTool = false"/>
 
 </div>
 </template>
@@ -56,14 +72,14 @@
     props: ['dataIn', 'ppi', 'size', 'colors', 'dist'],
     data() {
       return {
-        data: {},
+        dataAll: {},
         confirmDelete: false,
         ind: {},
         showTool:false
       }
     },
     mounted() {
-      this.data = this.dataIn
+      this.dataAll = this.dataIn
     },
     methods: {
       deleteEntry(){
@@ -99,6 +115,7 @@
       padding:5px;
       text-align:center;
       font-size:1.2em;
+      margin-top:50px;
     }
 
     div.confirm-delete-container{
@@ -144,21 +161,42 @@
 
     div.data-container{
       margin-top:20px;
+      margin-bottom:20px;
     }
     div.data-row{
       width:100%;
     }
     div.data-entry{
       display:inline-block;
-      padding:10px;
+      position:relative;
       background:#deedff;
       margin:5px;
+      padding: 5px;
       cursor:pointer;
-      width:50px;
-      height:30px;
+      width:100px;
+      height:100px;
     }
     div.data-entry:hover{
       box-shadow:5px 10px 18px #888888;
+    }
+
+    p.corner-label{
+      position:absolute;
+      top:-5px;
+      left:5px;
+      font-size:0.8em;
+      color:gray;
+    }
+    p.data{
+      padding:0;
+      margin:1px;
+    }
+
+    div.show-data-values{
+      width:95px;
+      height:65px;
+      margin-top:25px;
+      text-align:left;
     }
 
 

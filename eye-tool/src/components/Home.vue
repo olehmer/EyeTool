@@ -26,7 +26,7 @@
       </div>
     </div>
 
-    <div class="button top-right">Print Data</div>
+    <div class="button top-right" v-on:click="downloadData">Download Data</div>
   </div>
 
   <Calibrate v-if="calibrating" 
@@ -108,7 +108,7 @@
         //show the data view page
         var newEntry = {}
         newEntry.name = null
-        newEntry.data = [[null,null,null],[null,null,null],[null,null,null]]
+        newEntry.data = [[{},{},{}],[{},{},{}],[{},{},{}]]
           /*
         for(var i=0; i<3; i++){
           for(var j=0; j<3; j++){
@@ -142,6 +142,61 @@
         var expires = "expires="+ d.toUTCString()
           document.cookie = "cal=" + val + ";" + expires + 
             ";samesite=Strict; secure; path=/"
+      },
+      downloadData(){
+        var time = new Date();
+        var text = "Downloaded: " + time + "\n\n"
+        text += "V is the vertical offset in milimeters.\n"
+        text += "H is the horizontal offset in milimeters.\n"
+        text += "PD is the offset in prism dioptres.\n\n"
+
+        text += "Viewing distance was: " + this.dist + " meters.\n\n"
+
+
+        let d = this.data
+        //fill up undefined things here to keep the loop below looking cleaner
+        for(var l=0; l< d.length; l++){
+          for(var m=0; m<d[l].data.length; m++){
+            for(var k=0; k<d[l].data[m].length; k++){
+              d[l].data[m][k].v = d[l].data[m][k].v===undefined?"-":d[l].data[m][k].v
+              d[l].data[m][k].h = d[l].data[m][k].h===undefined?"-":d[l].data[m][k].h
+              d[l].data[m][k].pd = d[l].data[m][k].pd===undefined?"-":d[l].data[m][k].pd
+            }
+          }
+        }
+        for(var i=0; i< d.length; i++){
+          text += "Measurement name: " + d[i].name + "\n"
+          text += "-------------------------------------------------------\n"
+          for(var j=0; j<d[i].data.length; j++){
+            text += "|"+("  V: "+d[i].data[j][0].v).padEnd(15) + 
+                    "|"+("  V: "+d[i].data[j][1].v).padEnd(15) + 
+                    "|"+("  V: "+d[i].data[j][2].v).padEnd(15) + "\n"
+
+            text += "|"+("  H: "+d[i].data[j][0].h).padEnd(15) + 
+                    "|"+("  H: "+d[i].data[j][1].h).padEnd(15) + 
+                    "|"+("  H: "+d[i].data[j][2].h).padEnd(15) + "\n"
+
+            text += "|"+(" PD: "+d[i].data[j][0].pd).padEnd(15) + 
+                    "|"+(" PD: "+d[i].data[j][1].pd).padEnd(15) + 
+                    "|"+(" PD: "+d[i].data[j][2].pd).padEnd(15) + "\n"
+
+            text += "-------------------------------------------------------\n"
+          }
+          text += "\n\n"
+        }
+
+
+        var element = document.createElement('a');
+        element.setAttribute('href', 'data:text/plain;charset=utf-8,' + 
+          encodeURIComponent(text));
+        element.setAttribute('download', "data.txt");
+
+        element.style.display = 'none';
+        document.body.appendChild(element);
+
+        element.click();
+
+        document.body.removeChild(element);
       }
     }
   }
@@ -235,5 +290,12 @@
     position:fixed;
     top:10px;
     right:10px;
+  }
+  div.top-center{
+    position:fixed;
+    top:10px;
+    left:50%;
+    width:40px;
+    margin-left:-20px;
   }
 </style>

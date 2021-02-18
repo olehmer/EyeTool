@@ -1,11 +1,20 @@
 <template>
 <div class="container">
+
+  <div class="button top-center" style="z-index:401;" v-on:click="closeTool">
+    Done
+  </div>
+
+
     <div class="footer">
       <span class="footer">
         H={{h_offset}} [mm]
       </span>
       <span class="footer">
         V={{v_offset}} [mm]
+      </span>
+      <span class="footer">
+        PD={{pd}} [X]
       </span>
 
 
@@ -34,17 +43,25 @@
         startY: 0,
         v_offset: 0,
         h_offset:0,
+        pd: 0,
         dragging: false,
-        dragged: false
+        dragged: false,
+        preset: false
       }
     },
     mounted() {
-      if(this.data.data[this.ind.row][this.ind.col] === null){
+      if(this.data.data[this.ind.row][this.ind.col].x === undefined){
         let newMeasurement = {}
         newMeasurement.v = 0
         newMeasurement.h = 0
         newMeasurement.x = 0
         this.data.data[this.ind.row][this.ind.col] = newMeasurement
+      }
+      else{
+        //reconfigure the measurement.
+        this.green.x = this.data.data[this.ind.row][this.ind.col].x
+        this.green.y = this.data.data[this.ind.row][this.ind.col].y
+        this.preset = true
       }
 
       this.setupCanvas()
@@ -75,8 +92,10 @@
         this.red.x = this.ctx.canvas.width/2
         this.red.y = this.ctx.canvas.height/2
 
-        this.green.x = this.ctx.canvas.width/2
-        this.green.y = this.ctx.canvas.height/2
+        if(!this.preset){
+          this.green.x = this.ctx.canvas.width/2
+          this.green.y = this.ctx.canvas.height/2
+        }
 
         this.updateData()
 
@@ -188,16 +207,27 @@
 
       },
       updateData(){
-        let v_offset = Math.abs(this.red.y - this.green.y)
-        let h_offset = Math.abs(this.red.x - this.green.x)
+        let v_offset = (this.red.y - this.green.y)
+        let h_offset = -1*(this.red.x - this.green.x)
 
-        this.data.data[this.ind.row][this.ind.col].v = v_offset/this.ppi*25.4
-        this.data.data[this.ind.row][this.ind.col].h = h_offset/this.ppi*25.4
 
-        this.h_offset = 
-            Math.round(this.data.data[this.ind.row][this.ind.col].h*10)/10
-        this.v_offset =
-            Math.round(this.data.data[this.ind.row][this.ind.col].v*10)/10
+        this.h_offset = Math.round(h_offset/this.ppi*25.4*10)/10
+        this.v_offset = Math.round(v_offset/this.ppi*25.4*10)/10
+        this.data.data[this.ind.row][this.ind.col].v = this.v_offset
+        this.data.data[this.ind.row][this.ind.col].h = this.h_offset
+
+        //hypot is in mm, dist in m, so the factor of 100 drops due to the PD
+        //conversion
+        this.pd = Math.round(
+          Math.sqrt(this.h_offset**2 + this.v_offset**2)/this.dist*10)/10
+        this.data.data[this.ind.row][this.ind.col].pd = this.pd
+
+        //store the old x and y values
+        this.data.data[this.ind.row][this.ind.col].x = this.green.x
+        this.data.data[this.ind.row][this.ind.col].y = this.green.y
+      },
+      closeTool(){
+        this.$emit("closeTool")
       }
     }
   }
@@ -215,7 +245,7 @@
       position:fixed;
       bottom:10px;
       width:100%;
-      z-index:4001;
+      z-index:401;
     }
     span.footer{
       padding:15px;
@@ -236,7 +266,7 @@
         top:0;
         width:100%;
         height:100%;
-        background-color:red;
+        background-color:black;
         z-index:400;
     }
 
