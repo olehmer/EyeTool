@@ -54,7 +54,6 @@
         this.size = this.sizeIn
       }
       this.setupCanvas()
-      this.drawCircles()
     },
     methods: {
       setupCanvas(){
@@ -75,6 +74,8 @@
 
         //additive blending
         this.ctx.globalCompositeOperation = 'lighter'
+
+        this.drawCircles()
 
       },
       drawCircles(){

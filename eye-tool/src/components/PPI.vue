@@ -25,7 +25,7 @@
     </div>
 
     <div class="method" v-if="method==1">
-      <p>Using a ruler, the red line above is: </p>
+      <p>Using a ruler, the green line above is: </p>
       <input v-model="line_width" placeholder="line width in mm" 
         v-on:input="updatePPI">
       <span style="padding-left:10px;">millimeters wide.</span>
@@ -59,10 +59,8 @@
     methods: {
       setMethod(inpt){
           this.method = inpt
-          if(inpt == 1){
-            this.setupCanvas()
-            this.init()
-          }
+          this.setupCanvas()
+          this.init()
       },
       setupCanvas(){
         this.canvas = document.getElementById('canvas_ppi')
@@ -77,8 +75,9 @@
         this.ctx.canvas.width = window.innerWidth;
         this.ctx.canvas.height = 20
 
+        var color = this.method==1?"green":"red"
         var w = 0
-        if(this.ppi === null){
+        if(this.ppi === null || this.method == 1){
           w = this.ppi_default
         }
         else{
@@ -102,7 +101,7 @@
         this.ctx.moveTo(line.x, line.y) 
 
         this.ctx.lineTo(line.x + w, line.y)
-        this.ctx.strokeStyle = "red"
+        this.ctx.strokeStyle = color
         this.ctx.lineWidth = 5
         this.ctx.stroke()
       },
