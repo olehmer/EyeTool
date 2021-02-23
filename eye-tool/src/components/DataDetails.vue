@@ -1,69 +1,113 @@
 <template>
 <div class="container">
 
-  <div class="button top-left" v-on:click="confirmDelete = true">
-    Delete Entry
-  </div>
+  <div v-if="!showTool">
+    <div class="button top-left" v-on:click="confirmDelete = true">
+      Delete Entry
+    </div>
 
-  <div class="button top-right" v-on:click="closeDetailView" 
-    v-if="dataAll.name && dataAll.name.length > 0">
-    Done
-  </div>
+    <div class="button top-right" v-on:click="closeDetailView" 
+      v-if="dataAll.name && dataAll.name.length > 0">
+      Save
+    </div>
 
 
-  <input class="text" v-model="dataAll.name" placeholder="name this dataset">
+    <input class="text" v-model="dataAll.name" placeholder="name this dataset">
 
-  <div class="check-holder">
-    <input class="check" type="checkbox" id="checkbox" v-model="inverted">
-    <label for="checkbox">Invert colors</label>
-  </div>
-
-  <div class="data-container" v-if="dataAll.data !== undefined">
-    <div class="data-row" v-for="i in 3" :key="i">
-      <div class="data-entry" v-for="j in 3" :key="j" 
-        v-on:click="launcTool(i-1,j-1)">
-        <p class="corner-label">{{i}},{{j}}</p>
-
-        <div class="show-data-values">
-          <p class="data">
-            V: {{dataAll.data[i-1][j-1]?dataAll.data[i-1][j-1].v:"--"}}
-           </p>
-          <p class="data">
-            H: {{dataAll.data[i-1][j-1]?dataAll.data[i-1][j-1].h:"--"}}
-          </p>
-          <p class="data">
-            PD: {{dataAll.data[i-1][j-1]?dataAll.data[i-1][j-1].pd:"--"}}
-          </p>
+    <div v-if="dataAll.name && dataAll.name.length > 0">
+      <div>
+        <div class="check-holder">
+          <input class="check" type="checkbox" id="invertbox" v-model="inverted">
+          <label for="invertbox">Invert colors</label>
         </div>
+
+        <div class="check-holder" v-if="smallScreen">
+          <input class="check" type="checkbox" id="mobilebox" v-model="useMobile">
+          <label for="mobilebox">Use Mobile Mode</label>
+        </div>
+      </div>
+
+      <p v-if="useMobile">
+        Click a square below to launch the tool for that position.
+      </p>
+      <p v-if="!useMobile">
+        Click the grid below to launch the tool for all positions.
+      </p>
+
+      <div class="data-container" v-if="dataAll.data !== undefined">
+        <div style="display:inline-block;" 
+            v-bind:class="{clickable: !useMobile}"
+            v-on:click="launchTool()">
+          <div class="data-row" v-for="i in 3" :key="i">
+            <div class="data-entry" v-for="j in 3" :key="j" 
+              v-on:click="launchTool(i-1,j-1)"
+              v-bind:class="{clickable: useMobile}">
+              <p class="corner-label">{{i}},{{j}}</p>
+
+              <div class="show-data-values">
+                <p class="data">
+                  V: {{dataAll.data[i-1][j-1]?dataAll.data[i-1][j-1].v:""}}
+                 </p>
+                <p class="data">
+                  H: {{dataAll.data[i-1][j-1]?dataAll.data[i-1][j-1].h:""}}
+                </p>
+                <p class="data">
+                  PD: {{dataAll.data[i-1][j-1]?dataAll.data[i-1][j-1].pd:""}}
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+
+      <p class="data">V is the measured vertical offset in millimeters.</p>
+      <p class="data">H is the measured horizontal offset in millimeters.</p>
+      <p class="data">PD is the measured offset in prism dioptres.</p>
+
+
+      <div class="confirm-delete-container" v-if="confirmDelete"></div>
+      <div class="confirm-popup" v-if="confirmDelete">
+        <h3>Confirm Delete</h3>
+        <p>Are you sure you want to delete this entry and all its data? This can't
+          be undone.</p>
+
+        <div class="button delete-buttons cancel" 
+          v-on:click="confirmDelete = false">
+          Cancel
+        </div>
+
+        <div class="button delete-buttons yes" v-on:click="deleteEntry">
+          Yes
+        </div>
+      </div>
+
+    </div> <!-- end the no-name div -->
+    <div v-else>
+      <p>You must name this dataset before you can make measurements.</p>
+    </div>
+
+  </div> <!-- end the data details content -->
+
+  <Tool v-if="showTool && useMobile" :ppi="ppi" :size="size" :colors="colors" 
+    :dist="dist" :ind="ind" :data="dataAll" :invert="inverted"/>
+
+  <div class="tool-container" v-if="dataAll.data !== undefined && 
+    showTool && !useMobile">
+    <div class="tool-row" v-for="i in 3" :key="i">
+      <div class="tool-entry" v-for="j in 3" :key="j">
+        <Tool :ppi="ppi" :size="size" :colors="colors" :dist="dist"
+          :ind="{row:i-1, col:j-1}" :data="dataAll" :invert="inverted"/>
       </div>
 
     </div>
   </div>
 
-  <p class="data">V is the measured vertical offset in millimeters.</p>
-  <p class="data">H is the measured horizontal offset in millimeters.</p>
-  <p class="data">PD is the measured offset in prism dioptres.</p>
-
-
-  <div class="confirm-delete-container" v-if="confirmDelete"></div>
-  <div class="confirm-popup" v-if="confirmDelete">
-    <h3>Confirm Delete</h3>
-    <p>Are you sure you want to delete this entry and all its data? This can't
-      be undone.</p>
-
-    <div class="button delete-buttons cancel" 
-      v-on:click="confirmDelete = false">
-      Cancel
-    </div>
-
-    <div class="button delete-buttons yes" v-on:click="deleteEntry">
-      Yes
-    </div>
+  <div v-if="showTool" class="button top-right" 
+    v-on:click="showTool = false">
+    Done
   </div>
 
-  <Tool v-if="showTool" :ppi="ppi" :size="size" :colors="colors" :dist="dist"
-    :ind="ind" :data="dataAll" :invert="inverted" 
-    @closeTool="showTool = false"/>
 
 </div>
 </template>
@@ -84,22 +128,44 @@
         ind: {},
         showTool:false,
         inverted: false,
+        useMobile: false,
+        smallScreen: false,
+        forceDesktop: false,
       }
     },
     mounted() {
       this.dataAll = this.dataIn
+
+      window.onresize = this.configureLayout
+
+      this.configureLayout()
     },
     methods: {
+      configureLayout(){
+        if(window.innerWidth < 500) {
+          this.useMobile = true
+          this.smallScreen = true
+        }
+        else{
+          this.useMobile = false
+          this.smallScreen = false
+        }
+      },
       deleteEntry(){
         this.$emit('deleteEntry')
       },
       closeDetailView(){
         this.$emit('closeDetailView')
       },
-      launcTool(i,j){
-        this.ind.row = i
-        this.ind.col = j
-        this.showTool = true
+      launchTool(i,j){
+        if(this.useMobile && i !== undefined){
+          this.ind.row = i
+          this.ind.col = j
+          this.showTool = true
+        }
+        else if(!this.useMobile){
+          this.showTool = true
+        }
       }
     }
   }
@@ -175,6 +241,16 @@
       margin-top:20px;
       margin-bottom:20px;
     }
+    div.tool-container{
+      position:fixed;
+      top:0;
+      left:0;
+      margin:0;
+      padding:0;
+      width:100%;
+      height:100%;
+      background-color:white;
+    }
     div.data-row{
       width:100%;
     }
@@ -184,12 +260,33 @@
       background:#deedff;
       margin:5px;
       padding: 5px;
-      cursor:pointer;
       width:100px;
       height:100px;
     }
-    div.data-entry:hover{
+
+    div.clickable{
+      cursor:pointer;
+    }
+    div.clickable:hover{
       box-shadow:5px 10px 18px #888888;
+    }
+
+    div.tool-row{
+      width:100%;
+      margin:0;
+      padding:0;
+      height:33.33%;
+    }
+    div.tool-entry{
+      display:inline-block;
+      padding:0;
+      margin:0;
+      border:1px solid white;
+      height:100%;
+      width:33%;
+      position:relative;
+      top:0;
+      left:0;
     }
 
     p.corner-label{
@@ -215,6 +312,9 @@
 
     div.check-holder{
       margin-top:20px;
+      display:inline-block;
+      margin-left:20px;
+      margin-right:20px;
     }
 
 </style>

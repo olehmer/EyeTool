@@ -1,10 +1,10 @@
 <template>
-<div class="container">
+<div class="container" :ref='"cont_" + ind.row + "_" + ind.col'>
 
-  <div class="button top-right" style="z-index:401;" v-on:click="closeTool">
-    Done
-  </div>
-
+    <canvas id="canvas" :ref='"canvas_" + ind.row + "_" + ind.col'>
+        Your browser doesn't support HTML canvas. 
+        Please upgrade to a newer browser.
+    </canvas>
 
     <div class="footer">
       <span class="footer">
@@ -14,15 +14,16 @@
         V={{v_offset}} [mm]
       </span>
       <span class="footer">
-        PD={{pd}} [X]
+        PD={{pd}} [&#916;]
       </span>
-
-
     </div>
-    <canvas id="canvas">
-        Your browser doesn't support HTML canvas. 
-        Please upgrade to a newer browser.
-    </canvas>
+
+    <div class="header">
+      <span>
+        {{ind.row + 1}},{{ind.col + 1}}
+      </span>
+    </div>
+
 
 </div>
 </template>
@@ -76,7 +77,8 @@
     },
     methods: {
       setupCanvas(){
-        this.canvas = document.getElementById('canvas')
+        let ref = "canvas_" + this.ind.row + "_" + this.ind.col
+        this.canvas = this.$refs[ref] 
         this.canvas.onmousedown=this.mouseDown;
         this.canvas.onmousemove=this.mouseMove;
         this.canvas.onmouseup=this.mouseUp;
@@ -111,8 +113,15 @@
         this.drawCircles()
       },
       resizeCanvas(){
-        this.ctx.canvas.width = window.innerWidth;
-        this.ctx.canvas.height = window.innerHeight;
+        let ref = "cont_" + this.ind.row + "_" + this.ind.col
+        let element = this.$refs[ref]
+
+        if(element === undefined){
+          return
+        }
+    
+        this.ctx.canvas.width = element.clientWidth 
+        this.ctx.canvas.height = element.clientHeight 
 
         this.CLICK_DIST = 0.001*(this.ctx.canvas.width + this.ctx.canvas.height)/2
       },
@@ -225,19 +234,16 @@
         this.data.data[this.ind.row][this.ind.col].v = this.v_offset
         this.data.data[this.ind.row][this.ind.col].h = this.h_offset
 
-        //hypot is in mm, dist in m, so the factor of 100 drops due to the PD
-        //conversion
+        //hypot is in mm, dist in m, so the factor of 1000 drops due to the PD
+        //conversion and for rounding
         this.pd = Math.round(
-          Math.sqrt(this.h_offset**2 + this.v_offset**2)/this.dist*10)/10
+          Math.sqrt(this.h_offset**2 + this.v_offset**2)/this.dist)/10
         this.data.data[this.ind.row][this.ind.col].pd = this.pd
 
         //store the old x and y values
         this.data.data[this.ind.row][this.ind.col].x = this.green.x
         this.data.data[this.ind.row][this.ind.col].y = this.green.y
       },
-      closeTool(){
-        this.$emit("closeTool")
-      }
     }
   }
 
@@ -251,16 +257,27 @@
     }
     div.footer{
       color:white;
-      position:fixed;
-      bottom:10px;
+      position:absolute;
+      bottom:15px;
+      margin:0;
+      padding:0;
+      padding-bottom:10px;
       width:100%;
-      z-index:401;
     }
     span.footer{
-      padding:15px;
+      padding:5px;
+      width:33%;
+    }
+    div.header{
+      color:white;
+      position:absolute;
+      top:10px;
+      width:100%;
+      padding:0;
+      margin:0;
     }
     canvas{
-        position:fixed;
+        position:absolute;
         top:0;
         left:0;
         margin:0;
@@ -270,13 +287,12 @@
     div.container{
         margin:0;
         padding:0;
-        position:fixed;
+        position:absolute;
         left:0;
         top:0;
         width:100%;
         height:100%;
         background-color:black;
-        z-index:400;
     }
 
 </style>

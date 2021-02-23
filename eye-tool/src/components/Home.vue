@@ -156,21 +156,22 @@
         }
         for(var i=0; i< d.length; i++){
           text += "Measurement name: " + d[i].name + "\n"
-          text += "-------------------------------------------------------\n"
+          text += "".padEnd(49,'-') + "\n"
           for(var j=0; j<d[i].data.length; j++){
             text += "|"+("  V: "+d[i].data[j][0].v).padEnd(15) + 
                     "|"+("  V: "+d[i].data[j][1].v).padEnd(15) + 
-                    "|"+("  V: "+d[i].data[j][2].v).padEnd(15) + "\n"
+                    "|"+("  V: "+d[i].data[j][2].v).padEnd(15) + "|\n"
 
             text += "|"+("  H: "+d[i].data[j][0].h).padEnd(15) + 
                     "|"+("  H: "+d[i].data[j][1].h).padEnd(15) + 
-                    "|"+("  H: "+d[i].data[j][2].h).padEnd(15) + "\n"
+                    "|"+("  H: "+d[i].data[j][2].h).padEnd(15) + "|\n"
 
             text += "|"+(" PD: "+d[i].data[j][0].pd).padEnd(15) + 
                     "|"+(" PD: "+d[i].data[j][1].pd).padEnd(15) + 
-                    "|"+(" PD: "+d[i].data[j][2].pd).padEnd(15) + "\n"
+                    "|"+(" PD: "+d[i].data[j][2].pd).padEnd(15) + "|\n"
 
-            text += "-------------------------------------------------------\n"
+            text += "".padEnd(49,'-') + "\n"
+
           }
           text += "\n\n"
         }
