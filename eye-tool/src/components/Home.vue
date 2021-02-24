@@ -136,7 +136,7 @@
         d.setTime(d.getTime() + (1000*24*60*60*1000)) //1000 days!
         var expires = "expires="+ d.toUTCString()
           document.cookie = "cal=" + val + ";" + expires + 
-            ";samesite=Strict; secure;"
+            ";samesite=Strict;"
       },
       downloadData(){
         var time = new Date();
