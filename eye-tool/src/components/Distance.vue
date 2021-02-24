@@ -35,7 +35,6 @@
     mounted() {
       this.dist = this.distIn
       this.units = this.unitsIn
-      console.log(this.units)
     },
     methods: {
       updateDistance(){
