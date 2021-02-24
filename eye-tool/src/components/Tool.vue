@@ -1,5 +1,5 @@
 <template>
-<div class="container" :ref='"cont_" + ind.row + "_" + ind.col'>
+<div class="entry-container" :ref='"cont_" + ind.row + "_" + ind.col'>
 
     <canvas id="canvas" :ref='"canvas_" + ind.row + "_" + ind.col'>
         Your browser doesn't support HTML canvas. 
@@ -280,10 +280,10 @@
     div.footer{
       color:white;
       position:absolute;
-      bottom:15px;
+      bottom:5px;
       margin:0;
       padding:0;
-      padding-bottom:10px;
+      padding-bottom:0px;
       width:100%;
     }
     span.footer{
@@ -306,7 +306,7 @@
         padding:0;
         background-color:black;
     }
-    div.container{
+    div.entry-container{
         margin:0;
         padding:0;
         position:absolute;

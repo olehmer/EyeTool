@@ -104,8 +104,11 @@
 
   </div> <!-- end the data details content -->
 
-  <Tool v-if="showTool && useMobile" :ppiIn="ppi" :size="size" :colors="colors" 
-    :distIn="dist" :units="units" :ind="ind" :data="dataAll" :invert="inverted"/>
+  <div class="tool-container" v-if="dataAll.data !== undefined && 
+    showTool && useMobile">
+    <Tool :ppiIn="ppi" :size="size" :colors="colors" :distIn="dist" 
+      :units="units" :ind="ind" :data="dataAll" :invert="inverted"/>
+  </div>
 
   <div class="tool-container" v-if="dataAll.data !== undefined && 
     showTool && !useMobile">
@@ -192,6 +195,9 @@
     div.container{
         text-align:center;
         padding-top:20px;
+        padding-left:10px;
+        padding-right:10px;
+        padding-bottom:20px;
     }
     div.text-holder{
         text-align:left;
@@ -318,6 +324,18 @@
       padding:0;
       margin:1px;
     }
+
+
+    sup, sub {
+      vertical-align: baseline;
+      position: relative;
+      top: -0.4em;
+    }
+    sub { 
+      top: 0.4em; 
+    }
+
+
 
     div.show-data-values{
       width:95px;
