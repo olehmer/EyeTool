@@ -8,13 +8,16 @@
 
     <div class="footer">
       <span class="footer">
-        H={{h_offset}} [mm]
+        H={{hu}}<span v-if="units==0">&deg;</span>
+        <span v-else><sup>&Delta;</sup></span> 
       </span>
       <span class="footer">
-        V={{v_offset}} [mm]
+        V={{vu}}<span v-if="units==0">&deg;</span>
+        <span v-else><sup>&Delta;</sup></span> 
       </span>
       <span class="footer">
-        PD={{pd}} [&#916;]
+        T={{tu}}<span v-if="units==0">&deg;</span>
+        <span v-else><sup>&Delta;</sup></span>
       </span>
     </div>
 
@@ -32,7 +35,7 @@
 <script>
 
   export default{
-    props:['ind', 'ppi', 'colors', 'size', 'dist', 'data', 'invert'],
+    props:['ind', 'ppiIn', 'colors', 'size', 'distIn', 'units', 'data', 'invert'],
     data() {
       return {
         canvas: null,
@@ -42,35 +45,26 @@
         green: {},
         startX: 0,
         startY: 0,
-        v_offset: 0,
-        h_offset:0,
-        pd: 0,
+        vu: 0,
+        hu:0,
+        tu: 0,
         dragging: false,
         dragged: false,
         preset: false,
         gc: 0,
         rc: 1,
+        ppi: null,
+        dist: null,
       }
     },
     mounted() {
-      if(this.data.data[this.ind.row][this.ind.col].x === undefined){
-        let newMeasurement = {}
-        newMeasurement.v = 0
-        newMeasurement.h = 0
-        newMeasurement.x = 0
-        this.data.data[this.ind.row][this.ind.col] = newMeasurement
-      }
-      else{
-        //reconfigure the measurement.
-        this.green.x = this.data.data[this.ind.row][this.ind.col].x
-        this.green.y = this.data.data[this.ind.row][this.ind.col].y
-        this.preset = true
-      }
-
       if(this.invert){
         this.gc = 1
         this.rc = 0
       }
+
+      this.ppi = parseInt(this.ppiIn)
+      this.dist = parseFloat(this.distIn)
 
       this.setupCanvas()
       this.init()
@@ -101,9 +95,17 @@
         this.red.x = this.ctx.canvas.width/2
         this.red.y = this.ctx.canvas.height/2
 
-        if(!this.preset){
+        if(this.data.data[this.ind.row][this.ind.col].v === undefined){
+          this.data.data[this.ind.row][this.ind.col] = {}
           this.green.x = this.ctx.canvas.width/2
           this.green.y = this.ctx.canvas.height/2
+        }
+        else{
+          //reconfigure the measurement from mm to pixels.
+          this.green.x = this.red.x + 
+            this.data.data[this.ind.row][this.ind.col].h
+          this.green.y = this.red.y -
+            this.data.data[this.ind.row][this.ind.col].v
         }
 
         this.updateData()
@@ -225,24 +227,44 @@
 
       },
       updateData(){
+        //save the offset, given in pixels, as mm
         let v_offset = (this.red.y - this.green.y)
         let h_offset = -1*(this.red.x - this.green.x)
+        this.data.data[this.ind.row][this.ind.col].v = v_offset
+        this.data.data[this.ind.row][this.ind.col].h = h_offset
+
+        //offsets in mm
+        let v_mm = v_offset/this.ppi*25.4
+        let h_mm = h_offset/this.ppi*25.4
+        let hypot = Math.sqrt(v_mm**2 + h_mm**2) //in mm
 
 
-        this.h_offset = Math.round(h_offset/this.ppi*25.4*10)/10
-        this.v_offset = Math.round(v_offset/this.ppi*25.4*10)/10
-        this.data.data[this.ind.row][this.ind.col].v = this.v_offset
-        this.data.data[this.ind.row][this.ind.col].h = this.h_offset
+        if(this.units == 0){
+          //units have been set for degrees
 
-        //hypot is in mm, dist in m, so the factor of 1000 drops due to the PD
-        //conversion and for rounding
-        this.pd = Math.round(
-          Math.sqrt(this.h_offset**2 + this.v_offset**2)/this.dist)/10
-        this.data.data[this.ind.row][this.ind.col].pd = this.pd
+          //the total offset with units (tu) in degrees
+          let t_angle = Math.atan(hypot/this.dist/1000) //dist in m
+          //angle in radians so convert to degrees and round to 1 decimal 
+          this.tu = Math.round(t_angle*1800/Math.PI)/10
 
-        //store the old x and y values
-        this.data.data[this.ind.row][this.ind.col].x = this.green.x
-        this.data.data[this.ind.row][this.ind.col].y = this.green.y
+          //the vertical offset with units (vu) in degrees
+          let v_angle = Math.atan(v_mm/this.dist/1000) //dist in m
+          this.vu = Math.round(v_angle*1800/Math.PI)/10
+
+          //the horizontal offset with units (hu) in degrees
+          let h_angle = Math.atan(h_mm/this.dist/1000) //dist in m
+          this.hu = Math.round(h_angle*1800/Math.PI)/10
+        }
+        else{
+          //units in prism dioptres
+          this.tu = Math.round(hypot/this.dist)/10
+          this.vu = Math.round(v_mm/this.dist)/10
+          this.hu = Math.round(h_mm/this.dist)/10
+        }
+
+        this.data.data[this.ind.row][this.ind.col].tu = this.tu
+        this.data.data[this.ind.row][this.ind.col].vu = this.vu
+        this.data.data[this.ind.row][this.ind.col].hu = this.hu
       },
     }
   }

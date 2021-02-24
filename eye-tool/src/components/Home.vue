@@ -34,11 +34,13 @@
              :ppiIn="ppi" @setPPI="ppi = $event"
              :colorsIn="colors" @setColors="colors = $event" 
              :sizeIn="size" @setSize="size = $event"
-             :distIn="dist" @setDistance="dist = $event"
+             :distIn="dist" :unitsIn="units" @setDistance="dist = $event" 
+                                             @setUnits="units = $event"
              @calibrationDone="calibrationEnded()"/>
  
   <DataDetails class="data-details-container" v-if="dataDetails"
     :dataIn="currentData" :ppi="ppi" :size="size" :colors="colors" :dist="dist"
+    :units="units"
     @deleteEntry="deleteCurrentEntry"
     @closeDetailView="dataDetails = false"/>
   
@@ -65,6 +67,7 @@
         colors: null,
         size: null,
         dist: null,
+        units: null,
         invertColor: false,
         data: [],
         currentIndex: null,
@@ -82,6 +85,7 @@
         this.colors = cal.colors
         this.size = cal.size
         this.dist = cal.dist
+        this.units = cal.units
         this.calibrated = true
       }
     },
@@ -95,7 +99,7 @@
         this.calibrating = false
 
         if(this.ppi !== null && this.colors !== null &&
-           this.size !== null && this.dist !== null){
+           this.size !== null && this.dist !== null && this.units !== null){
           this.calibrated = true
           this.saveCalibration() //store it in a cookie
         }
@@ -124,6 +128,7 @@
         cal.colors = this.colors
         cal.size = this.size
         cal.dist = this.dist
+        cal.units = this.units
 
         let val = encodeURIComponent(JSON.stringify(cal))
 
@@ -131,16 +136,20 @@
         d.setTime(d.getTime() + (1000*24*60*60*1000)) //1000 days!
         var expires = "expires="+ d.toUTCString()
           document.cookie = "cal=" + val + ";" + expires + 
-            ";samesite=Strict; secure; path=/"
+            ";samesite=Strict; secure;"
       },
       downloadData(){
         var time = new Date();
         var text = "Downloaded: " + time + "\n\n"
-        text += "V is the vertical offset in millimeters.\n"
-        text += "H is the horizontal offset in millimeters.\n"
-        text += "PD is the offset in prism dioptres.\n\n"
 
-        text += "Viewing distance was: " + this.dist + " meters.\n\n"
+        text += "H is the horizontal offset.\n"
+        text += "V is the vertical offset.\n"
+        text += "T is the total offset (hypotenuse).\n\n"
+
+        text += "Viewing distance was: " + this.dist + " meters.\n"
+
+        let unit = this.units==0?"degrees":"prism dioptres"
+        text += "All table units are in " + unit + ".\n\n"
 
 
         let d = this.data
@@ -148,9 +157,9 @@
         for(var l=0; l< d.length; l++){
           for(var m=0; m<d[l].data.length; m++){
             for(var k=0; k<d[l].data[m].length; k++){
-              d[l].data[m][k].v = d[l].data[m][k].v===undefined?"-":d[l].data[m][k].v
-              d[l].data[m][k].h = d[l].data[m][k].h===undefined?"-":d[l].data[m][k].h
-              d[l].data[m][k].pd = d[l].data[m][k].pd===undefined?"-":d[l].data[m][k].pd
+              d[l].data[m][k].vu = d[l].data[m][k].vu===undefined?"-":d[l].data[m][k].vu
+              d[l].data[m][k].hu = d[l].data[m][k].hu===undefined?"-":d[l].data[m][k].hu
+              d[l].data[m][k].tu = d[l].data[m][k].tu===undefined?"-":d[l].data[m][k].tu
             }
           }
         }
@@ -158,17 +167,17 @@
           text += "Measurement name: " + d[i].name + "\n"
           text += "".padEnd(49,'-') + "\n"
           for(var j=0; j<d[i].data.length; j++){
-            text += "|"+("  V: "+d[i].data[j][0].v).padEnd(15) + 
-                    "|"+("  V: "+d[i].data[j][1].v).padEnd(15) + 
-                    "|"+("  V: "+d[i].data[j][2].v).padEnd(15) + "|\n"
+            text += "|"+(" H: "+d[i].data[j][0].hu).padEnd(15) + 
+                    "|"+(" H: "+d[i].data[j][1].hu).padEnd(15) + 
+                    "|"+(" H: "+d[i].data[j][2].hu).padEnd(15) + "|\n"
 
-            text += "|"+("  H: "+d[i].data[j][0].h).padEnd(15) + 
-                    "|"+("  H: "+d[i].data[j][1].h).padEnd(15) + 
-                    "|"+("  H: "+d[i].data[j][2].h).padEnd(15) + "|\n"
+            text += "|"+(" V: "+d[i].data[j][0].vu).padEnd(15) + 
+                    "|"+(" V: "+d[i].data[j][1].vu).padEnd(15) + 
+                    "|"+(" V: "+d[i].data[j][2].vu).padEnd(15) + "|\n"
 
-            text += "|"+(" PD: "+d[i].data[j][0].pd).padEnd(15) + 
-                    "|"+(" PD: "+d[i].data[j][1].pd).padEnd(15) + 
-                    "|"+(" PD: "+d[i].data[j][2].pd).padEnd(15) + "|\n"
+            text += "|"+(" T: "+d[i].data[j][0].tu).padEnd(15) + 
+                    "|"+(" T: "+d[i].data[j][1].tu).padEnd(15) + 
+                    "|"+(" T: "+d[i].data[j][2].tu).padEnd(15) + "|\n"
 
             text += "".padEnd(49,'-') + "\n"
 

@@ -10,7 +10,9 @@
     <PPI v-if="view==1" :ppiIn="ppiIn" @setPPI="updatePPI($event)"/>
     <Colors v-if="view==2" :colorsIn="colors" :sizeIn="size" 
         @setColors="updateColors($event)" @setSize="updateSize($event)"/>
-    <Distance v-if="view==3" :distIn="dist" @setDistance="updateDist($event)"/>
+      <Distance v-if="view==3" :distIn="dist" :unitsIn="units" 
+        @setDistance="updateDist($event)"
+        @setUnits="updateUnits($event)"/>
   </div>
 </template>
 
@@ -25,13 +27,14 @@ export default {
     Colors,
     Distance
   },
-  props: ["ppiIn", "sizeIn", "colorsIn", "distIn"],
+  props: ["ppiIn", "sizeIn", "colorsIn", "distIn", "unitsIn"],
   data() {
     return {
       ppi: null,
       colors:[[0,128,0],[128,0,0]],
       size: null,
       dist: null,
+      units: null,
       view: 1,
     }
   },
@@ -42,6 +45,7 @@ export default {
       this.colors = this.colorsIn
     }
     this.dist = this.distIn
+    this.units = this.unitsIn
   },
   methods: {
     canContinue(){
@@ -49,7 +53,8 @@ export default {
 
       if(this.view == 2) return true
 
-      if(this.view == 3 && this.dist !== null && this.dist >0) return true
+      if(this.view == 3 && this.dist !== null && this.dist >0 && 
+          this.units !== null) return true
 
       return false
     },
@@ -79,7 +84,17 @@ export default {
       this.dist = d
       this.$emit("setDistance", d)
 
-      if(this.dist > 0 && this.dist !== null){
+      this.distAndUnitsDone()
+    },
+    updateUnits(u){
+      //emit the units
+      this.units = u
+      this.$emit("setUnits", u)
+
+      this.distAndUnitsDone()
+    },
+    distAndUnitsDone(){
+      if(this.units !== null && this.dist !== null && this.dist > 0 ){
         this.canContinue[2] = true
       }
       else{

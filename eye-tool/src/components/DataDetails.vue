@@ -45,14 +45,26 @@
               <p class="corner-label">{{i}},{{j}}</p>
 
               <div class="show-data-values">
-                <p class="data">
-                  V: {{dataAll.data[i-1][j-1]?dataAll.data[i-1][j-1].v:""}}
-                 </p>
-                <p class="data">
-                  H: {{dataAll.data[i-1][j-1]?dataAll.data[i-1][j-1].h:""}}
+                <p class="data" v-if="dataAll.data[i-1][j-1].hu !== undefined">
+                  H: {{dataAll.data[i-1][j-1].hu}}<span v-if="units==0">&deg;
+                  </span><span v-else><sup>&Delta;</sup></span>
                 </p>
-                <p class="data">
-                  PD: {{dataAll.data[i-1][j-1]?dataAll.data[i-1][j-1].pd:""}}
+                <p class="data" v-else>
+                  H:
+                </p>
+                <p class="data" v-if="dataAll.data[i-1][j-1].vu !== undefined">
+                  V: {{dataAll.data[i-1][j-1].vu}}<span v-if="units==0">&deg;
+                  </span><span v-else><sup>&Delta;</sup></span>
+                </p>
+                <p class="data" v-else>
+                  V:
+                </p>
+                <p class="data" v-if="dataAll.data[i-1][j-1].tu !== undefined">
+                  T: {{dataAll.data[i-1][j-1].tu}}<span v-if="units==0">&deg;
+                  </span><span v-else><sup>&Delta;</sup></span>
+                </p>
+                <p class="data" v-else>
+                  T:
                 </p>
               </div>
             </div>
@@ -61,9 +73,12 @@
       </div>
 
 
-      <p class="data">V is the measured vertical offset in millimeters.</p>
-      <p class="data">H is the measured horizontal offset in millimeters.</p>
-      <p class="data">PD is the measured offset in prism dioptres.</p>
+      <p class="data">V is the measured vertical offset in 
+          {{units==0?"degrees":"prism dioptres"}}.</p>
+      <p class="data">H is the measured horizontal offset in 
+          {{units==0?"degrees":"prism dioptres"}}.</p>
+      <p class="data">T is the total measured offset (hypotenuse) in
+          {{units==0?"degrees":"prism dioptres"}}.</p>
 
 
       <div class="confirm-delete-container" v-if="confirmDelete"></div>
@@ -89,15 +104,16 @@
 
   </div> <!-- end the data details content -->
 
-  <Tool v-if="showTool && useMobile" :ppi="ppi" :size="size" :colors="colors" 
-    :dist="dist" :ind="ind" :data="dataAll" :invert="inverted"/>
+  <Tool v-if="showTool && useMobile" :ppiIn="ppi" :size="size" :colors="colors" 
+    :distIn="dist" :units="units" :ind="ind" :data="dataAll" :invert="inverted"/>
 
   <div class="tool-container" v-if="dataAll.data !== undefined && 
     showTool && !useMobile">
     <div class="tool-row" v-for="i in 3" :key="i">
       <div class="tool-entry" v-for="j in 3" :key="j">
-        <Tool :ppi="ppi" :size="size" :colors="colors" :dist="dist"
-          :ind="{row:i-1, col:j-1}" :data="dataAll" :invert="inverted"/>
+        <Tool :ppiIn="ppi" :size="size" :colors="colors" :distIn="dist" 
+          :units="units" :ind="{row:i-1, col:j-1}" :data="dataAll" 
+          :invert="inverted"/>
       </div>
 
     </div>
@@ -120,7 +136,7 @@
     components:{
       Tool
     },
-    props: ['dataIn', 'ppi', 'size', 'colors', 'dist'],
+    props: ['dataIn', 'ppi', 'size', 'colors', 'dist', 'units'],
     data() {
       return {
         dataAll: {},
