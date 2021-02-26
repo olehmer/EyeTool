@@ -1,7 +1,7 @@
 <template>
 <div class="container">
 
-  <div v-if="!showTool">
+  <div v-if="!showTool" class="grid-container">
     <div class="button top-left" v-on:click="confirmDelete = true">
       Delete Entry
     </div>
@@ -77,8 +77,8 @@
           {{units==0?"degrees":"prism dioptres"}}.</p>
       <p class="data">H is the measured horizontal offset in 
           {{units==0?"degrees":"prism dioptres"}}.</p>
-      <p class="data">T is the total measured offset (hypotenuse) in
-          {{units==0?"degrees":"prism dioptres"}}.</p>
+      <p class="data" style="padding-bottom:20px;">T is the total measured 
+          offset (hypotenuse) in {{units==0?"degrees":"prism dioptres"}}.</p>
 
 
       <div class="confirm-delete-container" v-if="confirmDelete"></div>
@@ -198,6 +198,7 @@
         padding-left:10px;
         padding-right:10px;
         padding-bottom:20px;
+        overflow:auto;
     }
     div.text-holder{
         text-align:left;
@@ -258,7 +259,16 @@
     div.yes{
       right:15px;
     }
-
+    div.grid-container{
+      position:fixed;
+      top:0;
+      left:0;
+      width:100%;
+      height:100%;
+      margin:0;
+      padding:0;
+      overflow:auto;
+    }
     div.data-container{
       margin-top:20px;
       margin-bottom:20px;
@@ -321,7 +331,7 @@
       color:gray;
     }
     p.data{
-      padding:0;
+      padding:1px;
       margin:1px;
     }
 

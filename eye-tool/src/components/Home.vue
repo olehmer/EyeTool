@@ -78,16 +78,7 @@
     },
     mounted() {
       //read cookies and adjust parameters as needed
-      if(document.cookie.length >0){
-        let decoded = decodeURIComponent(document.cookie)
-        let cal = JSON.parse(decoded.split("=")[1])
-        this.ppi = cal.ppi
-        this.colors = cal.colors
-        this.size = cal.size
-        this.dist = cal.dist
-        this.units = cal.units
-        this.calibrated = true
-      }
+      this.loadCalibration()
     },
     computed:{
       dataReversed: function(){
@@ -122,6 +113,26 @@
         this.data.splice(this.currentIndex, 1)
         this.dataDetails = false
       },
+      loadCalibration(){
+        var cal = null
+        if (typeof(Storage) !== "undefined") {
+          cal = JSON.parse(localStorage.getItem("cal"))
+        }
+        else if(document.cookie.length >0){
+          //no local storage, check for cookie
+          let decoded = decodeURIComponent(document.cookie)
+          cal = JSON.parse(decoded.split("=")[1])
+        }
+
+        if(cal !== null){
+          this.ppi = cal.ppi
+          this.colors = cal.colors
+          this.size = cal.size
+          this.dist = cal.dist
+          this.units = cal.units
+          this.calibrated = true
+        }
+      },
       saveCalibration(){
         let cal = {}
         cal.ppi = this.ppi
@@ -130,13 +141,20 @@
         cal.dist = this.dist
         cal.units = this.units
 
-        let val = encodeURIComponent(JSON.stringify(cal))
+        var val = JSON.stringify(cal)
 
-        var d = new Date()
-        d.setTime(d.getTime() + (1000*24*60*60*1000)) //1000 days!
-        var expires = "expires="+ d.toUTCString()
-          document.cookie = "cal=" + val + ";" + expires + 
-            ";samesite=Strict;"
+        if (typeof(Storage) !== "undefined") {
+          localStorage.setItem("cal", val);
+        }
+        else{
+          //no local storage, use a cookie
+          val = encodeURIComponent(JSON.stringify(val))
+          var d = new Date()
+          d.setTime(d.getTime() + (1000*24*60*60*1000)) //1000 days!
+          var expires = "expires="+ d.toUTCString()
+            document.cookie = "cal=" + val + ";" + expires + 
+              ";samesite=Strict;"
+        }
       },
       downloadData(){
         var time = new Date();
