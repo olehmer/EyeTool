@@ -81,8 +81,11 @@
           {{units==0?"degrees":"prism dioptres"}}.</p>
       <p class="data">H is the measured horizontal offset in 
           {{units==0?"degrees":"prism dioptres"}}.</p>
-      <p class="data" style="padding-bottom:20px;">T is the total measured 
-          offset (hypotenuse) in {{units==0?"degrees":"prism dioptres"}}.</p>
+        <p class="data" style="padding-bottom:20px;">T<sub>r</sub> and 
+          T<sub>g</sub> are the 
+          torsion measurements in degrees for the red and green squares, 
+          respectively.</p>
+
 
 
       <div class="confirm-delete-container" v-if="confirmDelete"></div>
