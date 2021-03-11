@@ -1,2 +1,2 @@
 # EyeToolForAlan
-Circles to track eye problems?
+Squares to track eye problems?

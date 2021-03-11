@@ -16,10 +16,12 @@
 
     <div v-if="dataAll.name && dataAll.name.length > 0">
       <div>
+        <!--
         <div class="check-holder">
           <input class="check" type="checkbox" id="invertbox" v-model="inverted">
           <label for="invertbox">Invert colors</label>
         </div>
+        -->
 
         <div class="check-holder" v-if="smallScreen">
           <input class="check" type="checkbox" id="mobilebox" v-model="useMobile">
@@ -42,7 +44,7 @@
             <div class="data-entry" v-for="j in 3" :key="j" 
               v-on:click="launchTool(i-1,j-1)"
               v-bind:class="{clickable: useMobile}">
-              <p class="corner-label">{{i}},{{j}}</p>
+              <p class="corner-label">{{(i-1)*3 + j}}</p>
 
               <div class="show-data-values">
                 <p class="data" v-if="dataAll.data[i-1][j-1].hu !== undefined">
@@ -59,12 +61,14 @@
                 <p class="data" v-else>
                   V:
                 </p>
-                <p class="data" v-if="dataAll.data[i-1][j-1].tu !== undefined">
-                  T: {{dataAll.data[i-1][j-1].tu}}<span v-if="units==0">&deg;
-                  </span><span v-else><sup>&Delta;</sup></span>
+                <p class="data torsion" 
+                   v-if="dataAll.data[i-1][j-1].rr !== undefined">
+                  T<sub>r</sub>: {{dataAll.data[i-1][j-1].rr}}&deg;, 
+                  T<sub>g</sub>: {{dataAll.data[i-1][j-1].gr}}&deg;
                 </p>
-                <p class="data" v-else>
-                  T:
+                <p class="data torsion" v-else>
+                  T<sub>r</sub>:, 
+                  T<sub>g</sub>:
                 </p>
               </div>
             </div>
@@ -333,6 +337,9 @@
     p.data{
       padding:1px;
       margin:1px;
+    }
+    p.torsion{
+      font-size:0.8em;
     }
 
 

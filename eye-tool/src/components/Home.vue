@@ -31,11 +31,12 @@
   </div>
 
   <Calibrate v-if="calibrating" 
-             :ppiIn="ppi" @setPPI="ppi = $event"
+             :ppiIn="ppi" @setPPI="ppi = parseFloat($event)"
              :colorsIn="colors" @setColors="colors = $event" 
-             :sizeIn="size" @setSize="size = $event"
-             :distIn="dist" :unitsIn="units" @setDistance="dist = $event" 
-                                             @setUnits="units = $event"
+             :sizeIn="size" @setSize="size = parseInt($event)"
+             :distIn="dist" :unitsIn="units" 
+             @setDistance="dist = parseFloat($event)" 
+             @setUnits="units = $event"
              @calibrationDone="calibrationEnded()"/>
  
   <DataDetails class="data-details-container" v-if="dataDetails"
@@ -125,10 +126,10 @@
         }
 
         if(cal !== null){
-          this.ppi = cal.ppi
+          this.ppi = parseFloat(cal.ppi)
           this.colors = cal.colors
-          this.size = cal.size
-          this.dist = cal.dist
+          this.size = parseInt(cal.size)
+          this.dist = parseFloat(cal.dist)
           this.units = cal.units
           this.calibrated = true
         }
@@ -160,14 +161,16 @@
         var time = new Date();
         var text = "Downloaded: " + time + "\n\n"
 
-        text += "H is the horizontal offset.\n"
-        text += "V is the vertical offset.\n"
-        text += "T is the total offset (hypotenuse).\n\n"
-
-        text += "Viewing distance was: " + this.dist + " meters.\n"
-
         let unit = this.units==0?"degrees":"prism dioptres"
-        text += "All table units are in " + unit + ".\n\n"
+
+        text += "H is the horizontal offset in "+unit+".\n"
+        text += "V is the vertical offset in "+unit+".\n\n"
+
+        text += "Tr is the torsion for the red square in degrees.\n"
+        text += "Tg is the torsion for the green square in degrees.\n\n"
+
+        text += "Viewing distance was: " + this.dist + " meters.\n\n\n"
+
 
 
         let d = this.data
@@ -177,7 +180,9 @@
             for(var k=0; k<d[l].data[m].length; k++){
               d[l].data[m][k].vu = d[l].data[m][k].vu===undefined?"-":d[l].data[m][k].vu
               d[l].data[m][k].hu = d[l].data[m][k].hu===undefined?"-":d[l].data[m][k].hu
-              d[l].data[m][k].tu = d[l].data[m][k].tu===undefined?"-":d[l].data[m][k].tu
+              d[l].data[m][k].rr = d[l].data[m][k].rr===undefined?"-":d[l].data[m][k].rr
+              d[l].data[m][k].gr = d[l].data[m][k].gr===undefined?"-":d[l].data[m][k].gr
+
             }
           }
         }
@@ -193,9 +198,13 @@
                     "|"+(" V: "+d[i].data[j][1].vu).padEnd(15) + 
                     "|"+(" V: "+d[i].data[j][2].vu).padEnd(15) + "|\n"
 
-            text += "|"+(" T: "+d[i].data[j][0].tu).padEnd(15) + 
-                    "|"+(" T: "+d[i].data[j][1].tu).padEnd(15) + 
-                    "|"+(" T: "+d[i].data[j][2].tu).padEnd(15) + "|\n"
+            text += "|"+(" Tr: "+d[i].data[j][0].rr).padEnd(15) + 
+                    "|"+(" Tr: "+d[i].data[j][1].rr).padEnd(15) + 
+                    "|"+(" Tr: "+d[i].data[j][2].rr).padEnd(15) + "|\n"
+
+            text += "|"+(" Tg: "+d[i].data[j][0].gr).padEnd(15) + 
+                    "|"+(" Tg: "+d[i].data[j][1].gr).padEnd(15) + 
+                    "|"+(" Tg: "+d[i].data[j][2].gr).padEnd(15) + "|\n"
 
             text += "".padEnd(49,'-') + "\n"
 
