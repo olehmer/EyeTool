@@ -14,81 +14,75 @@
 
     <input class="text" v-model="dataAll.name" placeholder="name this dataset">
 
-    <div v-if="dataAll.name && dataAll.name.length > 0">
-      <div>
-        <!--
-        <div class="check-holder">
-          <input class="check" type="checkbox" id="invertbox" v-model="inverted">
-          <label for="invertbox">Invert colors</label>
-        </div>
-        -->
 
-        <div class="check-holder" v-if="smallScreen">
-          <input class="check" type="checkbox" id="mobilebox" v-model="useMobile">
-          <label for="mobilebox">Use Mobile Mode</label>
+
+    <div class="overlay" v-if="showPrefs"></div>
+    <div class="preferences-container" v-if="showPrefs">
+      <Preferences :dataIn="dataAll" :ppi="ppi" @setPrefs="savePreferences"/>
+    </div>
+
+    <div v-if="dataAll.name && dataAll.name.length > 0">
+
+      <div class="button-container">
+        <div class="button padded" v-on:click="launchTool()">Launch Tool</div>
+        <p>(while the tool is open, press any keyboard key to exit)</p>
+        <div class="button split" v-on:click="showPrefs=true">Preferences</div>
+        <div class="button split" v-on:click="showResults = !showResults">
+          {{showResults?'Hide Results':'Show Results'}}
         </div>
       </div>
 
-      <p v-if="useMobile">
-        Click a square below to launch the tool for that position.
-      </p>
-      <p v-if="!useMobile">
-        Click the grid below to launch the tool for all positions.
-      </p>
-
-      <div class="data-container" v-if="dataAll.data !== undefined">
-        <div style="display:inline-block;" 
-            v-bind:class="{clickable: !useMobile}"
-            v-on:click="launchTool()">
+      <div class="data-container" 
+           v-if="showResults && dataAll.data !== undefined">
+        <div style="display:inline-block;">
           <div class="data-row" v-for="i in 3" :key="i">
             <div class="data-entry" v-for="j in 3" :key="j" 
-              v-on:click="launchTool(i-1,j-1)"
-              v-bind:class="{clickable: useMobile}">
+              v-on:click="launchTool(i-1,j-1)">
               <p class="corner-label">{{(i-1)*3 + j}}</p>
 
               <div class="show-data-values">
                 <p class="data" v-if="dataAll.data[i-1][j-1].hu !== undefined">
-                  H: {{dataAll.data[i-1][j-1].hu}}<span v-if="units==0">&deg;
-                  </span><span v-else><sup>&Delta;</sup></span>
+                  H: {{dataAll.data[i-1][j-1].hu}}
+                  <span v-if="dataAll.units==0">&deg;</span>
+                  <span v-else><sup>&Delta;</sup></span>
                 </p>
                 <p class="data" v-else>
                   H:
                 </p>
                 <p class="data" v-if="dataAll.data[i-1][j-1].vu !== undefined">
-                  V: {{dataAll.data[i-1][j-1].vu}}<span v-if="units==0">&deg;
-                  </span><span v-else><sup>&Delta;</sup></span>
+                  V: {{dataAll.data[i-1][j-1].vu}}
+                  <span v-if="dataAll.units==0">&deg;</span>
+                  <span v-else><sup>&Delta;</sup></span>
                 </p>
                 <p class="data" v-else>
                   V:
                 </p>
-                <p class="data torsion" 
+                <p class="data" 
                    v-if="dataAll.data[i-1][j-1].rr !== undefined">
-                  T<sub>r</sub>: {{dataAll.data[i-1][j-1].rr}}&deg;, 
-                  T<sub>g</sub>: {{dataAll.data[i-1][j-1].gr}}&deg;
+                  T: {{dataAll.data[i-1][j-1].rr - dataAll.data[i-1][j-1].gr}}&deg; 
                 </p>
-                <p class="data torsion" v-else>
-                  T<sub>r</sub>:, 
-                  T<sub>g</sub>:
+                <p class="data" v-else>
+                  T:
                 </p>
               </div>
             </div>
           </div>
         </div>
+
+        <p class="data">V is the measured vertical offset in 
+            {{dataAll.units==0?"degrees":"prism dioptres"}}.</p>
+        <p class="data">H is the measured horizontal offset in 
+            {{dataAll.units==0?"degrees":"prism dioptres"}}.</p>
+          <p class="data" style="padding-bottom:20px;">T is the 
+            torsion measurements in degrees.</p>
+
       </div>
 
 
-      <p class="data">V is the measured vertical offset in 
-          {{units==0?"degrees":"prism dioptres"}}.</p>
-      <p class="data">H is the measured horizontal offset in 
-          {{units==0?"degrees":"prism dioptres"}}.</p>
-        <p class="data" style="padding-bottom:20px;">T<sub>r</sub> and 
-          T<sub>g</sub> are the 
-          torsion measurements in degrees for the red and green squares, 
-          respectively.</p>
 
 
 
-      <div class="confirm-delete-container" v-if="confirmDelete"></div>
+      <div class="overlay" v-if="confirmDelete"></div>
       <div class="confirm-popup" v-if="confirmDelete">
         <h3>Confirm Delete</h3>
         <p>Are you sure you want to delete this entry and all its data? This can't
@@ -112,27 +106,17 @@
   </div> <!-- end the data details content -->
 
   <div class="tool-container" v-if="dataAll.data !== undefined && 
-    showTool && useMobile">
-    <Tool :ppiIn="ppi" :size="size" :colors="colors" :distIn="dist" 
-      :units="units" :ind="ind" :data="dataAll" :invert="inverted"/>
-  </div>
-
-  <div class="tool-container" v-if="dataAll.data !== undefined && 
-    showTool && !useMobile">
+    showTool">
     <div class="tool-row" v-for="i in 3" :key="i">
       <div class="tool-entry" v-for="j in 3" :key="j">
-        <Tool :ppiIn="ppi" :size="size" :colors="colors" :distIn="dist" 
-          :units="units" :ind="{row:i-1, col:j-1}" :data="dataAll" 
-          :invert="inverted"/>
+        <Tool :ppiIn="ppi" :ind="{row:i-1, col:j-1}" :data="dataAll" 
+          :showMeta="false" :config="false"/>
       </div>
 
     </div>
   </div>
 
-  <div v-if="showTool" class="button top-right" 
-    v-on:click="showTool = false">
-    Done
-  </div>
+
 
 
 </div>
@@ -141,26 +125,46 @@
 
 <script>
   import Tool from './Tool.vue'
+  import Preferences from './Preferences.vue'
 
   export default{
     components:{
-      Tool
+      Tool,
+      Preferences
     },
-    props: ['dataIn', 'ppi', 'size', 'colors', 'dist', 'units'],
+    props: ['dataIn', 'ppi', 'sizeIn', 'colorsIn', 'distIn', 'unitsIn'],
     data() {
       return {
         dataAll: {},
         confirmDelete: false,
         ind: {},
         showTool:false,
-        inverted: false,
-        useMobile: false,
         smallScreen: false,
         forceDesktop: false,
+        showPrefs: false,
+        showResults: false,
       }
     },
     mounted() {
+      document.onkeyup = this.closeTool
+
       this.dataAll = this.dataIn
+
+      if(this.dataAll.size === undefined){
+        this.dataAll.size = this.sizeIn
+      }
+      if(this.dataAll.colors === undefined){
+        this.dataAll.colors = this.colorsIn
+      }
+      if(this.dataAll.dist === undefined){
+        this.dataAll.dist = this.distIn
+      }
+      if(this.dataAll.unitsIn === undefined){
+        this.dataAll.units = this.unitsIn
+      }
+      if(this.dataAll.invert === undefined){
+        this.dataAll.invert = false 
+      }
 
       window.onresize = this.configureLayout
 
@@ -168,14 +172,7 @@
     },
     methods: {
       configureLayout(){
-        if(window.innerWidth < 500) {
-          this.useMobile = true
-          this.smallScreen = true
-        }
-        else{
-          this.useMobile = false
-          this.smallScreen = false
-        }
+
       },
       deleteEntry(){
         this.$emit('deleteEntry')
@@ -183,16 +180,16 @@
       closeDetailView(){
         this.$emit('closeDetailView')
       },
-      launchTool(i,j){
-        if(this.useMobile && i !== undefined){
-          this.ind.row = i
-          this.ind.col = j
-          this.showTool = true
-        }
-        else if(!this.useMobile){
-          this.showTool = true
-        }
-      }
+      launchTool(){
+        this.showTool = true
+      },
+      closeTool(){
+        this.showTool = false
+      },
+      savePreferences(){
+        //TODO update the data for changes in distance and units
+        this.showPrefs = false
+      },
     }
   }
 
@@ -225,7 +222,7 @@
       margin:5px;
     }
 
-    div.confirm-delete-container{
+    div.overlay{
       position:fixed;
       top:0;
       left:0;
@@ -266,6 +263,22 @@
     div.yes{
       right:15px;
     }
+
+    div.preferences-container{
+      position:fixed;
+      top:50%;
+      left:50%;
+      margin-top:-250px;
+      margin-left:-350px;
+      width:50%;
+      height:500px;
+      background-color:white;
+      opacity:1;
+      border:2px solid black;
+      z-index:300;
+      padding:10px;
+    }
+
     div.grid-container{
       position:fixed;
       top:0;
@@ -320,7 +333,6 @@
       display:inline-block;
       padding:0;
       margin:0;
-      border:1px solid white;
       height:100%;
       width:33%;
       position:relative;
@@ -369,6 +381,22 @@
       display:inline-block;
       margin-left:20px;
       margin-right:20px;
+    }
+
+    div.button-container{
+      width:50%;
+      max-width:500px;
+      text-align:center;
+      margin:auto;
+      padding:20px;
+    }
+    div.padded{
+      margin:10px;
+    }
+    div.split{
+      margin:10px;
+      display:inline-block;
+      width:40%;
     }
 
 </style>

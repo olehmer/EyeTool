@@ -40,8 +40,8 @@
              @calibrationDone="calibrationEnded()"/>
  
   <DataDetails class="data-details-container" v-if="dataDetails"
-    :dataIn="currentData" :ppi="ppi" :size="size" :colors="colors" :dist="dist"
-    :units="units"
+    :dataIn="currentData" :ppi="ppi" :sizeIn="size" :colorsIn="colors" 
+    :distIn="dist" :unitsIn="units"
     @deleteEntry="deleteCurrentEntry"
     @closeDetailView="dataDetails = false"/>
   
