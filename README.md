@@ -1,2 +1,2 @@
-# EyeToolForAlan
-Squares to track eye problems?
+# EyeTool
+More description to be added...
