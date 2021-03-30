@@ -310,14 +310,14 @@
       width:100%;
       margin:0;
       padding:0;
-      height:33.33%;
+      height:33.3333%;
     }
     div.tool-entry{
       display:inline-block;
       padding:0;
       margin:0;
       height:100%;
-      width:33%;
+      width:33.3333%;
       position:relative;
       top:0;
       left:0;
