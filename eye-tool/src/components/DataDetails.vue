@@ -6,6 +6,22 @@
       Delete Entry
     </div>
 
+    <div class="overlay" v-if="confirmDelete"></div>
+      <div class="confirm-popup" v-if="confirmDelete">
+        <h3>Confirm Delete</h3>
+        <p>Are you sure you want to delete this entry and all its data? This can't
+          be undone.</p>
+
+        <div class="button delete-buttons cancel" 
+          v-on:click="confirmDelete = false">
+          Cancel
+        </div>
+
+        <div class="button delete-buttons yes" v-on:click="deleteEntry">
+          Yes
+        </div>
+    </div>
+
     <div class="button top-right" v-on:click="closeDetailView" 
       v-if="dataAll.name && dataAll.name.length > 0">
       Save
@@ -82,21 +98,7 @@
 
 
 
-      <div class="overlay" v-if="confirmDelete"></div>
-      <div class="confirm-popup" v-if="confirmDelete">
-        <h3>Confirm Delete</h3>
-        <p>Are you sure you want to delete this entry and all its data? This can't
-          be undone.</p>
-
-        <div class="button delete-buttons cancel" 
-          v-on:click="confirmDelete = false">
-          Cancel
-        </div>
-
-        <div class="button delete-buttons yes" v-on:click="deleteEntry">
-          Yes
-        </div>
-      </div>
+      
 
     </div> <!-- end the no-name div -->
     <div v-else>
