@@ -1,124 +1,114 @@
 <template>
-  <div class="content-view">
-    <h3>Calibration (step {{view}} of 3)</h3>
-    <div class="button top-left" v-if="view>1" v-on:click="view--">Back</div>
-    <div class="button top-right" v-if="canContinue()" 
-      v-on:click="view<3?view++:calibrationDone()">
-      {{view==3?"Done":"Next"}}
+<div class="container">
+    <h3>Calibrate your device</h3>
+
+    <canvas id="canvas_ppi">
+        Your browser doesn't support HTML canvas. 
+        Please upgrade to a newer browser.
+    </canvas>
+
+    <div class="button top-right" v-if="!ppiError && ppi !== null"
+         v-on:click="sendPPI">
+      Done
     </div>
 
-    <PPI v-if="view==1" :ppiIn="ppiIn" @setPPI="updatePPI($event)"/>
-    <Colors v-if="view==2" :colorsIn="colors" :sizeIn="size" 
-        @setColors="updateColors($event)" @setSize="updateSize($event)"/>
-      <Distance v-if="view==3" :distIn="dist" :unitsIn="units" 
-        @setDistance="updateDist($event)"
-        @setUnits="updateUnits($event)"/>
-  </div>
+    <p>Using a ruler, the blue line above is: </p>
+    <input v-model="line_width" placeholder="line width in mm" 
+      v-on:input="updatePPI" style="width:100px;" 
+      v-bind:class="{error: ppiError}">
+    <span style="padding-left:10px;">millimeters wide.</span>
+
+
+</div>
 </template>
 
+
 <script>
-import PPI from './PPI.vue'
-import Colors from './Colors.vue'
-import Distance from './Distance.vue'
 
-export default {
-  components: {
-    PPI,
-    Colors,
-    Distance
-  },
-  props: ["ppiIn", "sizeIn", "colorsIn", "distIn", "unitsIn"],
-  data() {
-    return {
-      ppi: null,
-      colors:[[0,128,0],[128,0,0]],
-      size: null,
-      dist: null,
-      units: null,
-      view: 1,
-    }
-  },
-  mounted() {
-    this.ppi = this.ppiIn
-    this.size = this.sizeIn
-    if(this.colorsIn !== null){
-      this.colors = this.colorsIn
-    }
-    this.dist = this.distIn
-    this.units = this.unitsIn
-  },
-  methods: {
-    canContinue(){
-      if(this.view == 1 && this.ppi !== null && this.ppi >0) return true
-
-      if(this.view == 2) return true
-
-      if(this.view == 3 && this.dist !== null && this.dist >0 && 
-          this.units !== null) return true
-
-      return false
-    },
-    updatePPI(p){
-      //emit the ppi
-      this.ppi = p
-      this.$emit("setPPI", p)
-      if(this.ppi >0 && this.ppi !== null){
-        this.canContinue[0] = true
-      }
-      else{
-        this.canContinue[0] = false
+  export default{
+    props: ["ppiIn"],
+    data() {
+      return {
+        canvas: null,
+        ctx: null,
+        ppi: null,
+        ppi_default: 96,
+        line_width: null,
+        ppiError: false,
       }
     },
-    updateSize(s){
-      //emit the size
-      this.size = s
-      this.$emit("setSize", s)
-    },
-    updateColors(c){
-      //emit the colors
-      this.colors = c
-      this.$emit("setColors", c)
-    },
-    updateDist(d){
-      //emit the distance
-      this.dist = d
-      this.$emit("setDistance", d)
-
-      this.distAndUnitsDone()
-    },
-    updateUnits(u){
-      //emit the units
-      this.units = u
-      this.$emit("setUnits", u)
-
-      this.distAndUnitsDone()
-    },
-    distAndUnitsDone(){
-      if(this.units !== null && this.dist !== null && this.dist > 0 ){
-        this.canContinue[2] = true
+    mounted() {
+      this.ppi = this.ppiIn
+      let ppi = parseFloat(this.ppi)
+      if(ppi > 0){
+        this.line_width = this.ppi_default/ppi*25.4
       }
-      else{
-        this.canContinue[2] = false
-      }
+      this.setupCanvas()
+      this.init()
     },
-    calibrationDone(){
-      this.$emit("calibrationDone")
+    methods: {
+      setupCanvas(){
+        this.canvas = document.getElementById('canvas_ppi')
+
+        window.onresize = this.init
+
+        this.ctx = this.canvas.getContext('2d')
+      },
+      init(){
+        //resize canvas just in case
+        //this.ctx.canvas.width = window.innerWidth/2.2;
+        this.ctx.canvas.height = 20
+
+        let line = {}
+        line.x = this.ctx.canvas.width/2 - this.ppi_default/2
+        line.y = this.ctx.canvas.height/2
+
+        //clear the canvas, just in case
+        this.ctx.clearRect(0, 0, this.ctx.canvas.width, this.ctx.canvas.height)
+
+        //draw the line
+        this.ctx.beginPath()
+        this.ctx.moveTo(line.x, line.y) 
+
+        this.ctx.lineTo(line.x + this.ppi_default, line.y)
+        this.ctx.strokeStyle = "blue"
+        this.ctx.lineWidth = 5
+        this.ctx.stroke()
+      },
+      updatePPI(){
+        //25.4 mm per inch
+        let lw = parseFloat(this.line_width)
+        if(lw > 0){
+          this.ppi = Math.round(this.ppi_default/(lw)*25.4)
+          this.ppiError = false
+        }
+        else{
+          this.ppiError = true
+        }
+      },
+      sendPPI(){
+        if(!this.ppiError){
+          this.$emit('setPPI', this.ppi)
+        }
+      }
     }
   }
-}
+
 </script>
 
-<style>
-#app {
-  font-family: Avenir, Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
+<style scoped>
+    canvas{
+        margin-top:10px;
+        background-color:white;
+        display:block;
+        margin-left:auto;
+        margin-right:auto;
+    }
+    div.container{
+        margin:0px;
+        width:100%;
 
-div.content-view {
-  width:100%;
-  margin-top:20px;
-  padding-top:5px;
-}
-
+        color:black;
+        text-align:center;
+    }
 </style>

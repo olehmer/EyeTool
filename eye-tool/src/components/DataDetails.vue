@@ -150,22 +150,6 @@
 
       this.dataAll = this.dataIn
 
-      if(this.dataAll.size === undefined){
-        this.dataAll.size = this.sizeIn
-      }
-      if(this.dataAll.colors === undefined){
-        this.dataAll.colors = this.colorsIn
-      }
-      if(this.dataAll.dist === undefined){
-        this.dataAll.dist = this.distIn
-      }
-      if(this.dataAll.unitsIn === undefined){
-        this.dataAll.units = this.unitsIn
-      }
-      if(this.dataAll.invert === undefined){
-        this.dataAll.invert = false 
-      }
-
       window.onresize = this.configureLayout
 
       this.configureLayout()
@@ -187,8 +171,13 @@
         this.showTool = false
       },
       savePreferences(){
-        //TODO update the data for changes in distance and units
         this.showPrefs = false
+        let prefs = {}
+        prefs.size = this.dataAll.size
+        prefs.colors = this.dataAll.colors
+        prefs.dist = this.dataAll.dist
+        prefs.units = this.dataAll.units
+        this.$emit("updatePrefs", prefs)
       },
     }
   }
@@ -220,17 +209,6 @@
     }
     input.check{
       margin:5px;
-    }
-
-    div.overlay{
-      position:fixed;
-      top:0;
-      left:0;
-      width:100%;
-      height:100%;
-      background-color:black;
-      opacity:0.5;
-      z-index:200;
     }
     div.confirm-popup{
       position:fixed;
@@ -265,18 +243,21 @@
     }
 
     div.preferences-container{
-      position:fixed;
-      top:50%;
+      position:absolute;
+      top:10%;
       left:50%;
-      margin-top:-250px;
-      margin-left:-350px;
-      width:50%;
-      height:500px;
+      margin-left:-270px;
+      width:500px;
       background-color:white;
       opacity:1;
       border:2px solid black;
       z-index:300;
-      padding:10px;
+      padding:20px;
+
+      height:auto;
+      max-height:80%;
+
+      overflow:auto;
     }
 
     div.grid-container{

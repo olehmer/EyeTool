@@ -1,14 +1,11 @@
 <template>
 <div class="container" v-if="data != null">
 
-  <div class="banner">
-    <span class="title">Preferences</span>
+  <h3>Preferences</h3>
 
-    <div class="button right" v-on:click="savePrefs">
-      Done
-    </div>
+  <div class="button top-right" v-on:click="savePrefs">
+    Done
   </div>
-
 
   <div class="text-holder">
     <span style="margin-right:5px;">Patient viewing distance (meters):</span>
@@ -121,7 +118,6 @@
 <style scoped>
     div.container{
         text-align:center;
-        overflow:auto;
         width:100%;
         height:100%;
 
@@ -165,10 +161,6 @@
         margin:0;
         padding:0;
     }
-    div.banner{
-      position:relative;
-      height:50px;
-    }
     div.left{
       display:inline-block;
       float:left;
@@ -178,20 +170,5 @@
       right:10px;
       top:-5px;
     }
-    span.title{
-      font-size:1.5em;
-    }
-
-    .error{
-      border:1px solid red;
-      box-shadow: 0 0 17px red;
-      animation: pulsate 5s ease-out infinite;
-    }
-    @-webkit-keyframes pulsate {
-      0%   { box-shadow: 0 0 0 red; }
-      50%  { box-shadow: 0 0 17px red; }
-      100% { box-shadow: 0 0 0 red; }
-    }
-
 
 </style>

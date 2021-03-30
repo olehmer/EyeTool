@@ -1,7 +1,7 @@
 <template>
 <div class="container">
 
-  <div class="home"  v-if="!calibrating">
+  <div class="home">
     <h3>Data</h3>
     <div class="button top-left" v-on:click="calibrating=true">
       {{calibrated?"Recalibrate":"Calibrate"}}
@@ -10,8 +10,8 @@
     <div class="needs-cal" v-if="!calibrated">
       <p>You must calibrate this device before you can make measurements. Use
         the "Calibrate" button in the top left corner of the screen. The
-        calibration will be stored locally (via cookies) on your device for
-        future use. You can recalibrate at any time using the same button. </p>
+        calibration will be stored locally on your device for future use. You
+        can recalibrate at any time using the same button. </p>
     </div>
 
     <div class="data-holder" v-if="calibrated">
@@ -30,20 +30,18 @@
     <div class="button top-right" v-on:click="downloadData">Download Data</div>
   </div>
 
-  <Calibrate v-if="calibrating" 
-             :ppiIn="ppi" @setPPI="ppi = parseFloat($event)"
-             :colorsIn="colors" @setColors="colors = $event" 
-             :sizeIn="size" @setSize="size = parseInt($event)"
-             :distIn="dist" :unitsIn="units" 
-             @setDistance="dist = parseFloat($event)" 
-             @setUnits="units = $event"
-             @calibrationDone="calibrationEnded()"/>
+
+  <div class="overlay" v-if="calibrating"></div>
+  <div class="calibration-container" v-if="calibrating">
+    <Calibrate :ppiIn="ppi" @setPPI="calibrationEnded($event)"/>
+  </div>
  
   <DataDetails class="data-details-container" v-if="dataDetails"
     :dataIn="currentData" :ppi="ppi" :sizeIn="size" :colorsIn="colors" 
     :distIn="dist" :unitsIn="units"
     @deleteEntry="deleteCurrentEntry"
-    @closeDetailView="dataDetails = false"/>
+    @closeDetailView="dataDetails = false"
+    @updatePrefs="updateDefaults($event)"/>
   
 
 
@@ -65,16 +63,14 @@
         calibrated: false,
         calibrating: false,
         ppi: null,
-        colors: null,
-        size: null,
-        dist: null,
-        units: null,
-        invertColor: false,
+        colors: [[0,128,0],[128,0,0]], //default colors
+        size: 105, //default size of cirlces (roughly pixels)
+        dist: 1, //default 1m distance
+        units: 0, //default to degrees
         data: [],
         currentIndex: null,
         currentData: null,
         dataDetails: false,
-        cname: "cal"
       }
     },
     mounted() {
@@ -87,11 +83,11 @@
       }
     },
     methods: {
-      calibrationEnded(){
+      calibrationEnded(ppi){
+        this.ppi = parseFloat(ppi)
         this.calibrating = false
 
-        if(this.ppi !== null && this.colors !== null &&
-           this.size !== null && this.dist !== null && this.units !== null){
+        if(this.ppi > 0){
           this.calibrated = true
           this.saveCalibration() //store it in a cookie
         }
@@ -101,6 +97,11 @@
         var newEntry = {}
         newEntry.name = ""
         newEntry.data = [[{},{},{}],[{},{},{}],[{},{},{}]]
+
+        newEntry.size = this.size
+        newEntry.dist = this.dist
+        newEntry.colors = this.colors
+        newEntry.units = this.units
         
         this.data.push(newEntry)
         this.showDataDetails(this.data.length - 1)
@@ -133,6 +134,13 @@
           this.units = cal.units
           this.calibrated = true
         }
+      },
+      updateDefaults(defs){
+        this.colors = defs.colors
+        this.size = defs.size
+        this.dist = defs.dist
+        this.units = defs.units
+        this.saveCalibration()
       },
       saveCalibration(){
         let cal = {}
@@ -275,6 +283,19 @@
       background-color:white;
       z-index:1000;
     }
+    div.calibration-container{
+      position:fixed;
+      left:50%;
+      margin-left:-270px;
+      top:100px;
+      text-align:center;
+      z-index:300;
+      border:2px solid black;
+      width:500px;
+      padding:20px;
+      background-color:white;
+    }
+
 
 
 </style>
@@ -309,18 +330,38 @@
   }
 
   div.top-left{
-    position:fixed;
+    position:absolute;
     top:10px;
     left:10px;
   }
   div.top-right{
-    position:fixed;
+    position:absolute;
     top:10px;
     right:10px;
   }
   div.bottom-right{
-    position:fixed;
+    position:absolute;
     bottom:10px;
     right:10px;
+  }
+  div.overlay{
+    position:fixed;
+    top:0;
+    left:0;
+    width:100%;
+    height:100%;
+    background-color:black;
+    opacity:0.5;
+    z-index:200;
+  }
+  .error{
+    border:1px solid red;
+    box-shadow: 0 0 17px red;
+    animation: pulsate 5s ease-out infinite;
+  }
+  @-webkit-keyframes pulsate {
+    0%   { box-shadow: 0 0 0 red; }
+    50%  { box-shadow: 0 0 17px red; }
+    100% { box-shadow: 0 0 0 red; }
   }
 </style>
