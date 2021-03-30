@@ -169,15 +169,11 @@
         var time = new Date();
         var text = "Downloaded: " + time + "\n\n"
 
-        let unit = this.units==0?"degrees":"prism dioptres"
 
-        text += "H is the horizontal offset in "+unit+".\n"
-        text += "V is the vertical offset in "+unit+".\n\n"
+        text += "H is the horizontal offset.\n"
+        text += "V is the vertical offset.\n"
+        text += "T is the torsion. It is always in degrees.\n\n\n"
 
-        text += "Tr is the torsion for the red square in degrees.\n"
-        text += "Tg is the torsion for the green square in degrees.\n\n"
-
-        text += "Viewing distance was: " + this.dist + " meters.\n\n\n"
 
 
 
@@ -195,7 +191,10 @@
           }
         }
         for(var i=0; i< d.length; i++){
+          let unit = d[i].units==0?"degrees":"prism dioptres"
           text += "Measurement name: " + d[i].name + "\n"
+          text += "Viewing distance was: " + d[i].dist + " meters.\n"
+          text += "Units for H and V: "+unit+".\n"
           text += "".padEnd(49,'-') + "\n"
           for(var j=0; j<d[i].data.length; j++){
             text += "|"+(" H: "+d[i].data[j][0].hu).padEnd(15) + 
@@ -206,13 +205,12 @@
                     "|"+(" V: "+d[i].data[j][1].vu).padEnd(15) + 
                     "|"+(" V: "+d[i].data[j][2].vu).padEnd(15) + "|\n"
 
-            text += "|"+(" Tr: "+d[i].data[j][0].rr).padEnd(15) + 
-                    "|"+(" Tr: "+d[i].data[j][1].rr).padEnd(15) + 
-                    "|"+(" Tr: "+d[i].data[j][2].rr).padEnd(15) + "|\n"
-
-            text += "|"+(" Tg: "+d[i].data[j][0].gr).padEnd(15) + 
-                    "|"+(" Tg: "+d[i].data[j][1].gr).padEnd(15) + 
-                    "|"+(" Tg: "+d[i].data[j][2].gr).padEnd(15) + "|\n"
+            text += "|"+(" T: "+(d[i].data[j][0].rr - 
+                                 d[i].data[j][0].gr)%180).padEnd(15) + 
+                    "|"+(" T: "+(d[i].data[j][1].rr - 
+                                 d[i].data[j][1].gr)%180).padEnd(15) + 
+                    "|"+(" T: "+(d[i].data[j][2].rr - 
+                                 d[i].data[j][2].gr)%180).padEnd(15) + "|\n"
 
             text += "".padEnd(49,'-') + "\n"
 
