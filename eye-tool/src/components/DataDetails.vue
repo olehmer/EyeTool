@@ -52,8 +52,7 @@
            v-if="showResults && dataAll.data !== undefined">
         <div style="display:inline-block;">
           <div class="data-row" v-for="i in 3" :key="i">
-            <div class="data-entry" v-for="j in 3" :key="j" 
-              v-on:click="launchTool(i-1,j-1)">
+            <div class="data-entry" v-for="j in 3" :key="j">
               <p class="corner-label">{{(i-1)*3 + j}}</p>
 
               <div class="show-data-values">
@@ -73,9 +72,10 @@
                 <p class="data" v-else>
                   V:
                 </p>
-                <p class="data" 
+                <p class="data torsion" 
                    v-if="dataAll.data[i-1][j-1].rr !== undefined">
-                  T: {{dataAll.data[i-1][j-1].rr - dataAll.data[i-1][j-1].gr}}&deg; 
+                   T<sub>i</sub>: {{dataAll.data[i-1][j-1].rr}}&deg;, 
+                   T<sub>o</sub>: {{dataAll.data[i-1][j-1].gr}}&deg; 
                 </p>
                 <p class="data" v-else>
                   T:
@@ -83,17 +83,20 @@
               </div>
             </div>
           </div>
-        </div>
 
         <p class="data">V is the measured vertical offset in 
             {{dataAll.units==0?"degrees":"prism dioptres"}}.</p>
         <p class="data">H is the measured horizontal offset in 
             {{dataAll.units==0?"degrees":"prism dioptres"}}.</p>
-          <p class="data" style="padding-bottom:20px;">T is the 
+        <p class="data" style="padding-bottom:20px;">T is the 
             torsion measurements in degrees.</p>
+        </div>
+
+        <div class="plot-container">
+          <PlotData :ppi="ppi" :data="dataAll" />
+        </div>
 
       </div>
-
 
 
 
@@ -109,13 +112,16 @@
 
   <div class="tool-container" v-if="dataAll.data !== undefined && 
     showTool">
+    <Tool :ppiIn="ppi" :data="dataAll" :showMeta="true" :config="false"
+          @exitTool="closeTool"/>
+    <!--
     <div class="tool-row" v-for="i in 3" :key="i">
       <div class="tool-entry" v-for="j in 3" :key="j">
         <Tool :ppiIn="ppi" :ind="{row:i-1, col:j-1}" :data="dataAll" 
           :showMeta="false" :config="false"/>
       </div>
-
     </div>
+    -->
   </div>
 
 
@@ -128,11 +134,13 @@
 <script>
   import Tool from './Tool.vue'
   import Preferences from './Preferences.vue'
+  import PlotData from './PlotData.vue'
 
   export default{
     components:{
       Tool,
-      Preferences
+      Preferences,
+      PlotData
     },
     props: ['dataIn', 'ppi', 'sizeIn', 'colorsIn', 'distIn', 'unitsIn'],
     data() {
@@ -148,8 +156,6 @@
       }
     },
     mounted() {
-      document.onkeyup = this.closeTool
-
       this.dataAll = this.dataIn
 
       window.onresize = this.configureLayout
@@ -275,6 +281,15 @@
     div.data-container{
       margin-top:20px;
       margin-bottom:20px;
+    }
+    div.plot-container{
+      display:relative;
+      display:inline-block;
+      width:350px;
+      height:350px;
+      padding:0;
+      margin:0;
+      border:1px solid green;
     }
     div.tool-container{
       position:fixed;

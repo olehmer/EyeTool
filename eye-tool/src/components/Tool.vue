@@ -1,7 +1,7 @@
 <template>
-<div class="entry-container" :ref='"cont_" + ind.row + "_" + ind.col'>
+  <div class="entry-container" id="toolCont">
 
-    <canvas id="canvas" :ref='"canvas_" + ind.row + "_" + ind.col'>
+    <canvas id="toolCanvas">
         Your browser doesn't support HTML canvas. 
         Please upgrade to a newer browser.
     </canvas>
@@ -22,10 +22,7 @@
       </span>
       <span class="footer">
         V={{vu}}<span v-if="data.units==0">&deg;</span>
-        <span v-else><sup>&Delta;</sup></span> 
-      </span>
-      <span class="footer">
-        T={{(red.r - green.r)%180}}&deg;
+        <span v-else><sup>&Delta;</sup></span>
       </span>
     </div>
 
@@ -38,7 +35,7 @@
 <script>
 
   export default{
-    props:['ind', 'ppiIn', 'data', 'showMeta', 'config'],
+    props:['ppiIn', 'data', 'showMeta', 'config'],
     data() {
       return {
         canvas: null,
@@ -56,11 +53,17 @@
         ppi: null,
         dist: null,
         entries: null,
+        chars: [null,null,null,null],
+        ind: {row:1, col:1},
+        rotateInner: false,
+        rotateOuter: false,
       }
     },
     mounted() {
       if(this.config){
         this.entries = this.data.offset
+        this.ind.row = 0
+        this.ind.col = 0
       }
       else {
         this.entries = this.data.data
@@ -73,8 +76,7 @@
     },
     methods: {
       setupCanvas(){
-        let ref = "canvas_" + this.ind.row + "_" + this.ind.col
-        this.canvas = this.$refs[ref] 
+        this.canvas = document.getElementById('toolCanvas')
         this.canvas.onmousedown=this.mouseDown;
         this.canvas.onmousemove=this.mouseMove;
         this.canvas.onmouseup=this.mouseUp;
@@ -87,6 +89,8 @@
 
         this.canvas.onwheel=this.scroll;
 
+        document.onkeyup = this.handleKey
+
 
         window.onresize = this.init
 
@@ -96,10 +100,26 @@
       init(){
         this.resizeCanvas()
 
+        this.configureMarkerLocation()
+
+        this.randomCharacters()
+
+        this.updateData()
+
+        this.drawCircles()
+      },
+      configureMarkerLocation(){
+        var centerX = this.ctx.canvas.width/6*(1+2*this.ind.col)
+        var centerY = this.ctx.canvas.height/6*(1+2*this.ind.row)
+
+        if(this.config){
+          centerX = this.ctx.canvas.width/2
+          centerY = this.ctx.canvas.height/2
+        }
 
         //set defaults
-        this.red.x = this.ctx.canvas.width/2 
-        this.red.y = this.ctx.canvas.height/2
+        this.red.x = centerX
+        this.red.y = centerY
         this.red.r = 0
 
         if(this.entries[this.ind.row][this.ind.col].v !== undefined){
@@ -117,19 +137,12 @@
         }
 
         if(this.entries[this.ind.row][this.ind.col].v === undefined){
+          //center the outer marker, no preset values
           this.entries[this.ind.row][this.ind.col] = {}
 
-          var rand_x = 0
-          var rand_y = 0
-          var rand_r = 0
-          if(!this.config){
-            rand_x = Math.floor(Math.random()*this.data.size) - this.data.size/2
-            rand_y = Math.floor(Math.random()*this.data.size) - this.data.size/2
-            rand_r = Math.floor(Math.random()*90) - 45
-          }
-          this.green.x = this.ctx.canvas.width/2 + rand_x
-          this.green.y = this.ctx.canvas.height/2 + rand_y
-          this.green.r = 0 + rand_r
+          this.green.x = centerX
+          this.green.y = centerY
+          this.green.r = 0 
         }
         else{
           //reconfigure the measurement from mm to pixels.
@@ -139,14 +152,9 @@
             this.entries[this.ind.row][this.ind.col].v
           this.green.r = this.entries[this.ind.row][this.ind.col].gr
         }
-
-        this.updateData()
-
-        this.drawCircles()
       },
       resizeCanvas(){
-        let ref = "cont_" + this.ind.row + "_" + this.ind.col
-        let element = this.$refs[ref]
+        let element = document.getElementById('toolCont')
 
         if(element === undefined){
           return
@@ -155,56 +163,114 @@
         this.ctx.canvas.width = element.clientWidth 
         this.ctx.canvas.height = element.clientHeight 
       },
+      drawGrid(){
+        //draw a grid of blue lines on the tool, for debugging
+        this.ctx.globalCompositeOperation = 'source-over'
+
+        this.ctx.beginPath()
+        this.ctx.strokeStyle= "blue"
+        this.ctx.lineWidth = 3
+        this.ctx.moveTo(0, this.ctx.canvas.height/3*(1))
+        this.ctx.lineTo(this.ctx.canvas.width, this.ctx.canvas.height/3*(1))
+        this.ctx.stroke()
+
+        this.ctx.beginPath()
+        this.ctx.moveTo(0, this.ctx.canvas.height/3*(2))
+        this.ctx.lineTo(this.ctx.canvas.width, this.ctx.canvas.height/3*(2))
+        this.ctx.stroke()
+
+        this.ctx.beginPath()
+        this.ctx.moveTo(this.ctx.canvas.width/3*(1), 0)
+        this.ctx.lineTo(this.ctx.canvas.width/3*(1), this.ctx.canvas.height)
+        this.ctx.stroke()
+
+        this.ctx.beginPath()
+        this.ctx.moveTo(this.ctx.canvas.width/3*(2), 0)
+        this.ctx.lineTo(this.ctx.canvas.width/3*(2), this.ctx.canvas.height)
+        this.ctx.stroke()
+       
+      },
       drawCircles() {
         this.ctx.clearRect(0, 0, this.ctx.canvas.width, this.ctx.canvas.height)
 
-
-        this.ctx.globalCompositeOperation = 'source-over'
-
-        //draw the red circle
-        this.ctx.beginPath()
-        this.ctx.translate(this.red.x, this.red.y)
-        this.ctx.rotate(this.red.r * Math.PI/180)
-        this.ctx.arc(0, 0, this.data.size/1.25, 0, 2*Math.PI)
-
-        this.ctx.fillStyle = `rgb(${this.data.colors[this.rc][0]}, 
-                                 ${this.data.colors[this.rc][1]}, 
-                                 ${this.data.colors[this.rc][2]})`
-
-        this.ctx.fill()
+        //this.drawGrid()
 
 
-        //draw the black line through the red circle
-        this.ctx.beginPath()
-        this.ctx.strokeStyle= "black"
-        this.ctx.lineWidth = this.data.size/2.5
-        this.ctx.moveTo(0, -this.data.size)
-        this.ctx.lineTo(0, this.data.size)
-        this.ctx.stroke()
+        if(!this.rotateOuter){
+          this.ctx.globalCompositeOperation = 'source-over'
 
-        this.ctx.rotate(-this.red.r * Math.PI/180)
-        this.ctx.translate(-(this.red.x), -(this.red.y))
+          //draw the red circle
+          this.ctx.beginPath()
+          this.ctx.translate(this.red.x, this.red.y)
+          this.ctx.rotate(this.red.r * Math.PI/180)
+          this.ctx.arc(0, 0, this.data.size/1.25, 0, 2*Math.PI)
+
+          this.ctx.fillStyle = `rgb(${this.data.colors[this.rc][0]}, 
+                                   ${this.data.colors[this.rc][1]}, 
+                                   ${this.data.colors[this.rc][2]})`
+
+          this.ctx.fill()
+
+
+          //draw the black line through the red circle
+          this.ctx.beginPath()
+          this.ctx.strokeStyle= "black"
+          this.ctx.lineWidth = this.data.size/2.5
+          this.ctx.moveTo(0, -this.data.size)
+          this.ctx.lineTo(0, this.data.size)
+          this.ctx.stroke()
+
+          //draw the letters, still black from before
+          let letterSize = this.data.size/2
+          this.ctx.font = letterSize + "px Arial";
+          this.ctx.textAlign = 'center'
+          this.ctx.textBaseline='middle'
+          this.ctx.fillStyle='black'
+          this.ctx.fillText(this.chars[0], -this.data.size/2.00, 0);
+          this.ctx.fillText(this.chars[1], this.data.size/2.00, 0);
+
+
+          this.ctx.rotate(-this.red.r * Math.PI/180)
+          this.ctx.translate(-(this.red.x), -(this.red.y))
+        }
 
         
-        this.ctx.globalCompositeOperation = 'lighter'
+        if(!this.rotateInner){
+          this.ctx.globalCompositeOperation = 'lighter'
 
 
-        this.ctx.beginPath()
-        this.ctx.translate(this.green.x, this.green.y)
-        this.ctx.rotate(this.green.r * Math.PI/180)
+          this.ctx.beginPath()
+          this.ctx.translate(this.green.x, this.green.y)
+          this.ctx.rotate(this.green.r * Math.PI/180)
 
-        this.ctx.arc(0, 0, this.data.size, 0, 2*Math.PI)
+          this.ctx.arc(0, 0, this.data.size, 0, 2*Math.PI)
 
-        this.ctx.moveTo(0, -this.data.size)
-        this.ctx.lineTo(0, this.data.size)
-                        
-        this.ctx.strokeStyle = `rgb(${this.data.colors[this.gc][0]}, 
-                                   ${this.data.colors[this.gc][1]}, 
-                                   ${this.data.colors[this.gc][2]})`
-        this.ctx.lineWidth = this.data.size/2.5 //this.line_width
-        this.ctx.stroke()
-        this.ctx.rotate(-this.green.r * Math.PI/180)
-        this.ctx.translate(-(this.green.x), -(this.green.y))
+          this.ctx.moveTo(0, -this.data.size)
+          this.ctx.lineTo(0, this.data.size)
+                          
+          this.ctx.strokeStyle = `rgb(${this.data.colors[this.gc][0]}, 
+                                     ${this.data.colors[this.gc][1]}, 
+                                     ${this.data.colors[this.gc][2]})`
+          this.ctx.lineWidth = this.data.size/2.5 //this.line_width
+          this.ctx.stroke()
+
+          //draw the text
+          this.ctx.globalCompositeOperation = 'source-over'
+          this.ctx.fillStyle='black'
+          this.ctx.fillText(this.chars[2], -this.data.size/1.00, 0);
+          this.ctx.fillText(this.chars[3], this.data.size/1.00, 0);
+
+          this.ctx.rotate(-this.green.r * Math.PI/180)
+          this.ctx.translate(-(this.green.x), -(this.green.y))
+        }
+      },
+      randomCharacters(){
+        let chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
+        let charLen = chars.length
+        this.chars[0] = chars.charAt(Math.floor(Math.random()*charLen))
+        this.chars[1] = chars.charAt(Math.floor(Math.random()*charLen))
+        this.chars[2] = chars.charAt(Math.floor(Math.random()*charLen))
+        this.chars[3] = chars.charAt(Math.floor(Math.random()*charLen))
       },
       mouseDown(e){
         e.preventDefault()
@@ -226,6 +292,10 @@
         this.startY = parseInt(e.touches[0].clientY)
       },
       move(mouseX, mouseY){
+        if(this.rotateInner || this.rotateOuter){
+          //only move when not rotating
+          return
+        }
         let dx = mouseX-this.startX;
         let dy = mouseY-this.startY;
 
@@ -276,23 +346,117 @@
         e.stopPropagation()
 
         if(e.deltaY <0){
-          if(this.config){
+          if(this.rotateInner){
             this.red.r -= 1
+            if(this.red.r < -90){
+              this.red.r += 180
+            }
           }
-          else{
+          if(this.rotateOuter){
             this.green.r -= 1
+            if(this.green.r < -90){
+              this.green.r += 180
+            }
           }
         }
         else{
-          if(this.config){
+          if(this.rotateInner){
             this.red.r += 1
+            if(this.red.r > 90){
+              this.red.r -= 180
+            }
           }
-          else{
+          if(this.rotateOuter){
             this.green.r += 1
+            if(this.green.r > 90){
+              this.green.r -= 180
+            }
           }
         }
         this.drawCircles()
         this.updateData()
+      },
+      handleKey(event){
+        event.preventDefault()
+        event.stopPropagation()
+
+        if(this.config){
+          //no keys during config
+          return
+        }
+
+        let key = event.keyCode
+        switch(key){
+          case 49:
+            //1
+            this.ind.row = 0;
+            this.ind.col = 0;
+            break;
+          case 50:
+            //2
+            this.ind.row = 0;
+            this.ind.col = 1;
+            break;
+          case 51:
+            //3
+            this.ind.row = 0;
+            this.ind.col = 2;
+            break;
+          case 52:
+            //4
+            this.ind.row = 1;
+            this.ind.col = 0;
+            break;
+          case 53:
+            //5
+            this.ind.row = 1;
+            this.ind.col = 1;
+            break;
+          case 54:
+            //6
+            this.ind.row = 1;
+            this.ind.col = 2;
+            break;
+          case 55:
+            //7
+            this.ind.row = 2;
+            this.ind.col = 0;
+            break;
+          case 56:
+            //8
+            this.ind.row = 2;
+            this.ind.col = 1;
+            break;
+          case 57:
+            //9
+            this.ind.row = 2;
+            this.ind.col = 2;
+            break;
+          case 73:
+            //i key, change inner marker angle
+            this.rotateOuter = false;
+            this.rotateInner = true;
+            break;
+          case 79:
+            //o key, change the outer marker angle
+            this.rotateInner = false;
+            this.rotateOuter = true;
+            break;
+          case 80:
+            //p key, proceed back to tool ;)
+            this.rotateOuter = false;
+            this.rotateInner = false;
+            break;
+          case 81:
+            //q, emit the quit
+            this.$emit("exitTool");
+            break;
+        }
+        if(key > 48 && key < 58){
+          this.randomCharacters()
+        }
+        this.configureMarkerLocation()
+        this.drawCircles()
       },
       updateData(){
         //save the offset, given in pixels, as mm

@@ -3,15 +3,9 @@
 
   <div class="home">
     <h3>Data</h3>
-    <div class="button top-left" v-on:click="calibrating=true">
-      {{calibrated?"Recalibrate":"Calibrate"}}
-    </div>
-
-    <div class="needs-cal" v-if="!calibrated">
-      <p>You must calibrate this device before you can make measurements. Use
-        the "Calibrate" button in the top left corner of the screen. The
-        calibration will be stored locally on your device for future use. You
-        can recalibrate at any time using the same button. </p>
+    <div class="button top-left" v-on:click="calibrating=true" 
+         v-if="calibrated">
+      Recalibrate
     </div>
 
     <div class="data-holder" v-if="calibrated">
@@ -133,6 +127,10 @@
           this.dist = parseFloat(cal.dist)
           this.units = cal.units
           this.calibrated = true
+        }
+        else{
+          //needs to calibrate, show popup
+          this.calibrating = true
         }
       },
       updateDefaults(defs){

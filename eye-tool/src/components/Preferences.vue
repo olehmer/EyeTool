@@ -32,8 +32,7 @@
   </div>
   <div class="tool-container" 
     v-bind:style="{width: toolWidth + 'px', height: toolHeight + 'px'}">
-    <Tool ref="tool" :ppiIn="ppi" :ind="{row:0, col:0}" :data="data" 
-      :showMeta="true" :config="true"/>
+    <Tool ref="tool" :ppiIn="ppi" :data="data" :showMeta="true" :config="true"/>
   </div>
 
   <div class="slide-cont" v-for="(color,index) in data.colors" :key="index">
