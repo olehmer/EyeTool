@@ -385,7 +385,9 @@
           return
         }
 
+
         let key = event.keyCode
+
         switch(key){
           case 49:
             //1
@@ -449,6 +451,10 @@
             break;
           case 81:
             //q, emit the quit
+            this.$emit("exitTool");
+            break;
+          case 27:
+            //ESC, emit the quit
             this.$emit("exitTool");
             break;
         }

@@ -1,43 +1,12 @@
 <template>
 <div class="container">
 
-  <div v-if="!showTool" class="grid-container">
-    <div class="button top-left" v-on:click="confirmDelete = true">
-      Delete Entry
-    </div>
-
-    <div class="overlay" v-if="confirmDelete"></div>
-      <div class="confirm-popup" v-if="confirmDelete">
-        <h3>Confirm Delete</h3>
-        <p>Are you sure you want to delete this entry and all its data? This can't
-          be undone.</p>
-
-        <div class="button delete-buttons cancel" 
-          v-on:click="confirmDelete = false">
-          Cancel
-        </div>
-
-        <div class="button delete-buttons yes" v-on:click="deleteEntry">
-          Yes
-        </div>
-    </div>
-
-    <div class="button top-right" v-on:click="closeDetailView" 
-      v-if="dataAll.name && dataAll.name.length > 0">
-      Save
-    </div>
-
-
-    <input class="text" v-model="dataAll.name" placeholder="name this dataset">
-
-
 
     <div class="overlay" v-if="showPrefs"></div>
     <div class="preferences-container" v-if="showPrefs">
       <Preferences :dataIn="dataAll" :ppi="ppi" @setPrefs="savePreferences"/>
     </div>
 
-    <div v-if="dataAll.name && dataAll.name.length > 0">
 
       <div class="button-container">
         <div class="button padded" v-on:click="launchTool()">Launch Tool</div>
@@ -50,7 +19,6 @@
 
       <div class="data-container" 
            v-if="showResults && dataAll.data !== undefined">
-
 
         <div v-on:click="showPlot=true" class="result-selector"
            v-bind:class="{active: showPlot}">
@@ -90,7 +58,8 @@
                      T<sub>o</sub>: {{dataAll.data[i-1][j-1].gr}}&deg; 
                   </p>
                   <p class="data" v-else>
-                    T:
+                     T<sub>i</sub>: 
+                     T<sub>o</sub>:
                   </p>
                 </div>
               </div>
@@ -107,7 +76,7 @@
 
         <div v-if="showPlot">
           <div class="plot-container">
-            <PlotData :ppi="ppi" :data="dataAll" />
+            <PlotData :ppi="ppi" :data="dataAll" ref="plot"/>
           </div>
         </div>
 
@@ -116,27 +85,11 @@
 
 
 
-      
-
-    </div> <!-- end the no-name div -->
-    <div v-else>
-      <p>You must name this dataset before you can make measurements.</p>
-    </div>
-
-  </div> <!-- end the data details content -->
 
   <div class="tool-container" v-if="dataAll.data !== undefined && 
     showTool">
     <Tool :ppiIn="ppi" :data="dataAll" :showMeta="false" :config="false"
           @exitTool="closeTool"/>
-    <!--
-    <div class="tool-row" v-for="i in 3" :key="i">
-      <div class="tool-entry" v-for="j in 3" :key="j">
-        <Tool :ppiIn="ppi" :ind="{row:i-1, col:j-1}" :data="dataAll" 
-          :showMeta="false" :config="false"/>
-      </div>
-    </div>
-    -->
   </div>
 
 
@@ -157,15 +110,13 @@
       Preferences,
       PlotData
     },
-    props: ['dataIn', 'ppi', 'sizeIn', 'colorsIn', 'distIn', 'unitsIn'],
+    props: ['dataIn', 'ppi'],
     data() {
       return {
         dataAll: {},
         confirmDelete: false,
         ind: {},
         showTool:false,
-        smallScreen: false,
-        forceDesktop: false,
         showPrefs: false,
         showResults: false,
         showPlot: true,
@@ -182,16 +133,11 @@
       configureLayout(){
 
       },
-      deleteEntry(){
-        this.$emit('deleteEntry')
-      },
-      closeDetailView(){
-        this.$emit('closeDetailView')
-      },
       launchTool(){
         this.showTool = true
       },
       closeTool(){
+        this.showResults = false
         this.showTool = false
       },
       savePreferences(){
@@ -203,6 +149,11 @@
         prefs.units = this.dataAll.units
         this.$emit("updatePrefs", prefs)
       },
+      triggerPlotDownload(){
+        if(this.$refs.plot!==undefined){
+          this.$refs.plot.downloadPlot()
+        }
+      }
     }
   }
 

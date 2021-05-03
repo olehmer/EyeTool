@@ -4,7 +4,7 @@ module.exports = {
         config
         .plugin('html')
         .tap(args => {
-          args[0].title = 'EyeTool'
+          args[0].title = 'H-L Test'
           return args
         })
     }

@@ -238,8 +238,8 @@
             if(point.hu!==undefined){
               //draw the outer marker 
               let baseX = this.hSep*(j - 1) - this.offsetX
-              let baseY = this.vSep*(i - 1) - this.offsetY
-              var x = baseX - point.hu
+              let baseY = this.vSep*(1 - i) - this.offsetY
+              var x = baseX + point.hu
               var y = baseY + point.vu
 
               let resO = this.getCanvasCoordsForPoint(x, y)
@@ -296,6 +296,19 @@
         this.ctx.translate(-(resV[0] - 30), -resV[1])
 
       },
+      downloadPlot(){
+        var element = document.createElement('a');
+        let image = this.ctx.canvas.toDataURL("image/jpg")
+        element.href = image
+        element.download = 'HL-test.jpg'
+
+        element.style.display = 'none';
+        document.body.appendChild(element);
+
+        element.click();
+
+        document.body.removeChild(element);
+      }
     }
   }
 
