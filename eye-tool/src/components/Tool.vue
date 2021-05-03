@@ -17,11 +17,11 @@
 
     <div class="footer" v-if="showMeta">
       <span class="footer">
-        H={{hu}}<span v-if="data.units==0">&deg;</span>
+        H={{-1*hu}}<span v-if="data.units==0">&deg;</span>
         <span v-else><sup>&Delta;</sup></span> 
       </span>
       <span class="footer">
-        V={{vu}}<span v-if="data.units==0">&deg;</span>
+        V={{-1*vu}}<span v-if="data.units==0">&deg;</span>
         <span v-else><sup>&Delta;</sup></span>
       </span>
     </div>

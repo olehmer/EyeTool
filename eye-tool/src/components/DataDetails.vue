@@ -41,59 +41,74 @@
 
       <div class="button-container">
         <div class="button padded" v-on:click="launchTool()">Launch Tool</div>
-        <p>(while the tool is open, press any keyboard key to exit)</p>
         <div class="button split" v-on:click="showPrefs=true">Preferences</div>
         <div class="button split" v-on:click="showResults = !showResults">
           {{showResults?'Hide Results':'Show Results'}}
         </div>
       </div>
 
+
       <div class="data-container" 
            v-if="showResults && dataAll.data !== undefined">
-        <div style="display:inline-block;">
-          <div class="data-row" v-for="i in 3" :key="i">
-            <div class="data-entry" v-for="j in 3" :key="j">
-              <p class="corner-label">{{(i-1)*3 + j}}</p>
 
-              <div class="show-data-values">
-                <p class="data" v-if="dataAll.data[i-1][j-1].hu !== undefined">
-                  H: {{dataAll.data[i-1][j-1].hu}}
-                  <span v-if="dataAll.units==0">&deg;</span>
-                  <span v-else><sup>&Delta;</sup></span>
-                </p>
-                <p class="data" v-else>
-                  H:
-                </p>
-                <p class="data" v-if="dataAll.data[i-1][j-1].vu !== undefined">
-                  V: {{dataAll.data[i-1][j-1].vu}}
-                  <span v-if="dataAll.units==0">&deg;</span>
-                  <span v-else><sup>&Delta;</sup></span>
-                </p>
-                <p class="data" v-else>
-                  V:
-                </p>
-                <p class="data torsion" 
-                   v-if="dataAll.data[i-1][j-1].rr !== undefined">
-                   T<sub>i</sub>: {{dataAll.data[i-1][j-1].rr}}&deg;, 
-                   T<sub>o</sub>: {{dataAll.data[i-1][j-1].gr}}&deg; 
-                </p>
-                <p class="data" v-else>
-                  T:
-                </p>
-              </div>
-            </div>
-          </div>
 
-        <p class="data">V is the measured vertical offset in 
-            {{dataAll.units==0?"degrees":"prism dioptres"}}.</p>
-        <p class="data">H is the measured horizontal offset in 
-            {{dataAll.units==0?"degrees":"prism dioptres"}}.</p>
-        <p class="data" style="padding-bottom:20px;">T is the 
-            torsion measurements in degrees.</p>
+        <div v-on:click="showPlot=true" class="result-selector"
+           v-bind:class="{active: showPlot}">
+          Plot
+        </div>
+        <div v-on:click="showPlot=false" class="result-selector"
+             v-bind:class="{active: !showPlot}">
+            Text
         </div>
 
-        <div class="plot-container">
-          <PlotData :ppi="ppi" :data="dataAll" />
+        <div v-if="!showPlot">
+          <div style="display:inline-block;">
+            <div class="data-row" v-for="i in 3" :key="i">
+              <div class="data-entry" v-for="j in 3" :key="j">
+                <p class="corner-label">{{(i-1)*3 + j}}</p>
+
+                <div class="show-data-values">
+                  <p class="data" v-if="dataAll.data[i-1][j-1].hu !== undefined">
+                    H: {{dataAll.data[i-1][j-1].hu}}
+                    <span v-if="dataAll.units==0">&deg;</span>
+                    <span v-else><sup>&Delta;</sup></span>
+                  </p>
+                  <p class="data" v-else>
+                    H:
+                  </p>
+                  <p class="data" v-if="dataAll.data[i-1][j-1].vu !== undefined">
+                    V: {{dataAll.data[i-1][j-1].vu}}
+                    <span v-if="dataAll.units==0">&deg;</span>
+                    <span v-else><sup>&Delta;</sup></span>
+                  </p>
+                  <p class="data" v-else>
+                    V:
+                  </p>
+                  <p class="data torsion" 
+                     v-if="dataAll.data[i-1][j-1].rr !== undefined">
+                     T<sub>i</sub>: {{dataAll.data[i-1][j-1].rr}}&deg;, 
+                     T<sub>o</sub>: {{dataAll.data[i-1][j-1].gr}}&deg; 
+                  </p>
+                  <p class="data" v-else>
+                    T:
+                  </p>
+                </div>
+              </div>
+            </div>
+
+          <p class="data">V is the measured vertical offset in 
+              {{dataAll.units==0?"degrees":"prism dioptres"}}.</p>
+          <p class="data">H is the measured horizontal offset in 
+              {{dataAll.units==0?"degrees":"prism dioptres"}}.</p>
+          <p class="data" style="padding-bottom:20px;">T is the 
+              torsion measurements in degrees.</p>
+          </div>
+        </div>
+
+        <div v-if="showPlot">
+          <div class="plot-container">
+            <PlotData :ppi="ppi" :data="dataAll" />
+          </div>
         </div>
 
       </div>
@@ -112,7 +127,7 @@
 
   <div class="tool-container" v-if="dataAll.data !== undefined && 
     showTool">
-    <Tool :ppiIn="ppi" :data="dataAll" :showMeta="true" :config="false"
+    <Tool :ppiIn="ppi" :data="dataAll" :showMeta="false" :config="false"
           @exitTool="closeTool"/>
     <!--
     <div class="tool-row" v-for="i in 3" :key="i">
@@ -153,6 +168,7 @@
         forceDesktop: false,
         showPrefs: false,
         showResults: false,
+        showPlot: true,
       }
     },
     mounted() {
@@ -285,11 +301,11 @@
     div.plot-container{
       display:relative;
       display:inline-block;
-      width:350px;
-      height:350px;
+      width:100%;
+      max-width:500px;
       padding:0;
       margin:0;
-      border:1px solid green;
+      text-align:center;
     }
     div.tool-container{
       position:fixed;
@@ -395,6 +411,21 @@
       margin:10px;
       display:inline-block;
       width:40%;
+    }
+
+    div.result-selector{
+      display:inline-block;
+      padding:10px;
+      cursor:pointer;
+      font-size:1.1em;
+      color: gray;
+    }
+    div.result-selector:hover{
+      text-decoration: underline;
+    }
+    div.active{
+      color: #1C79A6;
+      font-weight:bold;
     }
 
 </style>
