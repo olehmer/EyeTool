@@ -108,7 +108,7 @@
       },
       updateUnits(){
         this.$refs.tool.updateData() 
-      }
+      },
     }
   }
 

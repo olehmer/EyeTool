@@ -157,6 +157,7 @@
   import Preferences from './Preferences.vue'
   import PlotData from './PlotData.vue'
   import Help from './Help.vue'
+  import CalculateDistance from "./CalculateDistance.js"
 
   export default{
     components:{
@@ -165,6 +166,7 @@
       PlotData,
       Help,
     },
+    mixins: [CalculateDistance],
     props: ['dataIn', 'ppi'],
     data() {
       return {
@@ -210,12 +212,30 @@
         prefs.dist = this.dataAll.dist
         prefs.units = this.dataAll.units
         this.$emit("updatePrefs", prefs)
+
+        this.updateDataMeasurements()
       },
       triggerPlotDownload(){
         if(this.$refs.plot!==undefined){
           this.$refs.plot.downloadPlot(this.dataAll.name)
         }
-      }
+      },
+      updateDataMeasurements(){
+        for(var i=0; i<3; i++){
+          for(var j=0; j<3; j++){
+            let d = this.dataAll.data[i][j]
+            if(d.gx === undefined){
+              continue
+            }
+            let newM = this.getEyeOffset(this.dataAll.dist, 
+                                         {x:this.dataAll.cx, y:this.dataAll.cy},
+                                         {x:d.rx, y:d.ry}, {x:d.gx, y:d.gy},
+                                         this.ppi, this.dataAll.units)
+            d.vu = newM.v
+            d.hu = newM.h
+          }
+        }
+      },
     }
   }
 

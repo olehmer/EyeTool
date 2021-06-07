@@ -118,6 +118,11 @@
           centerX = this.ctx.canvas.width/2
           centerY = this.ctx.canvas.height/2
         }
+        else{
+          //store the center location
+          this.data.cx = this.ctx.canvas.width/2
+          this.data.cy = this.ctx.canvas.height/2
+        }
 
         //set defaults
         this.red.x = centerX
@@ -516,6 +521,11 @@
         this.entries[this.ind.row][this.ind.col].hu = this.hu
         this.entries[this.ind.row][this.ind.col].gr = this.green.r
         this.entries[this.ind.row][this.ind.col].rr = this.red.r
+
+        this.entries[this.ind.row][this.ind.col].gx = this.green.x
+        this.entries[this.ind.row][this.ind.col].gy = this.green.y
+        this.entries[this.ind.row][this.ind.col].rx = this.red.x
+        this.entries[this.ind.row][this.ind.col].ry = this.red.y
       },
     }
   }
