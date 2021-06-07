@@ -81,7 +81,6 @@
           yo =  this.data.offset[0][0].v
         }
 
-
         this.hSep = this.getDistance(h_offset, this.data.dist, this.ppi, 
                                      this.data.units)
         this.vSep = this.getDistance(v_offset, this.data.dist, this.ppi,
