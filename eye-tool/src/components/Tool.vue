@@ -33,9 +33,11 @@
 
 
 <script>
+  import CalculateDistance from "./CalculateDistance.js"
 
   export default{
     props:['ppiIn', 'data', 'showMeta', 'config'],
+    mixins: [CalculateDistance],
     data() {
       return {
         canvas: null,
@@ -51,12 +53,12 @@
         gc: 0,
         rc: 1,
         ppi: null,
-        dist: null,
         entries: null,
         chars: [null,null,null,null],
         ind: {row:1, col:1},
         rotateInner: false,
         rotateOuter: false,
+        showGrayDots: false,
       }
     },
     mounted() {
@@ -156,7 +158,7 @@
       resizeCanvas(){
         let element = document.getElementById('toolCont')
 
-        if(element === undefined){
+        if(element === undefined || element === null){
           return
         }
     
@@ -168,7 +170,7 @@
         this.ctx.globalCompositeOperation = 'source-over'
 
         this.ctx.beginPath()
-        this.ctx.strokeStyle= "blue"
+        this.ctx.strokeStyle= "gray"
         this.ctx.lineWidth = 3
         this.ctx.moveTo(0, this.ctx.canvas.height/3*(1))
         this.ctx.lineTo(this.ctx.canvas.width, this.ctx.canvas.height/3*(1))
@@ -190,10 +192,34 @@
         this.ctx.stroke()
        
       },
+      drawGrayCircles(){
+        let w_step = this.ctx.canvas.width/6
+        let h_step = this.ctx.canvas.height/6
+
+        this.ctx.fillStyle = "#222222" 
+
+        for(var i=0; i<3; i++){
+          for(var j=0; j<3; j++){
+            if(i != this.ind.row || j != this.ind.col){
+              //draw a circle
+              this.ctx.beginPath()
+              this.ctx.arc(w_step*(1 + 2*j), h_step*(1 + 2*i), 
+                           this.data.size/1.5, 0, 2*Math.PI)
+              this.ctx.fill()
+
+            }
+          }
+        }
+
+      },
       drawCircles() {
         this.ctx.clearRect(0, 0, this.ctx.canvas.width, this.ctx.canvas.height)
 
         //this.drawGrid()
+
+        if(this.showGrayDots){
+          this.drawGrayCircles()
+        }
 
 
         if(!this.rotateOuter){
@@ -434,6 +460,10 @@
             this.ind.row = 2;
             this.ind.col = 2;
             break;
+          case 71:
+            //g
+            this.showGrayDots = !this.showGrayDots
+            break;
           case 73:
             //i key, change inner marker angle
             this.rotateOuter = false;
@@ -471,26 +501,16 @@
         this.entries[this.ind.row][this.ind.col].v = v_offset
         this.entries[this.ind.row][this.ind.col].h = h_offset
 
-        //offsets in mm
-        let v_mm = v_offset/this.ppi*25.4
-        let h_mm = h_offset/this.ppi*25.4
 
-        if(this.data.units == 0){
-          //units have been set for degrees
+        let centerPos = {}
+        centerPos.x = this.ctx.canvas.width/2
+        centerPos.y = this.ctx.canvas.height/2
+        let res = this.getEyeOffset(this.data.dist, centerPos, this.red, 
+                                         this.green, this.ppi, this.data.units)
 
-          //the vertical offset with units (vu) in degrees
-          let v_angle = Math.atan(v_mm/this.data.dist/1000) //dist in m
-          this.vu = Math.round(v_angle*18000/Math.PI)/100
+        this.vu = res.v
+        this.hu = res.h
 
-          //the horizontal offset with units (hu) in degrees
-          let h_angle = Math.atan(h_mm/this.data.dist/1000) //dist in m
-          this.hu = Math.round(h_angle*18000/Math.PI)/100
-        }
-        else{
-          //units in prism dioptres
-          this.vu = Math.round(v_mm/this.data.dist*10)/100
-          this.hu = Math.round(h_mm/this.data.dist*10)/100
-        }
 
         this.entries[this.ind.row][this.ind.col].vu = this.vu
         this.entries[this.ind.row][this.ind.col].hu = this.hu

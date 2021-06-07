@@ -8,6 +8,19 @@
       Recalibrate
     </div>
 
+    <div class="data-holder" v-if="calibrated">
+      <div class="button" v-on:click="addDataEntry">Add Data Entry</div>
+
+      <div class="table-holder">
+        <div class="table-row" v-for="(row, index) in dataReversed" 
+          :key="index" 
+          v-on:click="showDataDetails(data.length -1 - index)" 
+          v-bind:class="{odd: (index+1)%2}">
+          <p>{{row.name}}</p>
+        </div>
+      </div>
+    </div>
+
     <div class="button top-right" v-on:click="downloadData">Download Data</div>
   </div>
 
@@ -16,9 +29,13 @@
   <div class="calibration-container" v-if="calibrating">
     <Calibrate :ppiIn="ppi" @setPPI="calibrationEnded($event)"/>
   </div>
+
+  <DataDetails class="data-details-container" v-if="dataDetails"
+    :dataIn="currentData" :ppi="ppi"
+    @deleteEntry="deleteCurrentEntry"
+    @closeDetailView="dataDetails = false"
+    @updatePrefs="updateDefaults($event)"/>
  
-  <DataDetails ref="details" v-if="data !== undefined"
-    :dataIn="data" :ppi="ppi" @updatePrefs="updateDefaults($event)"/>
   
 
 
@@ -44,13 +61,20 @@
         size: 105, //default size of cirlces (roughly pixels)
         dist: 1, //default 1m distance
         units: 0, //default to degrees
-        data: undefined,
+        data: [],
+        currentIndex: null,
+        currentData: null,
+        dataDetails: false,
       }
     },
     mounted() {
       //read cookies and adjust parameters as needed
       this.loadCalibration()
-      this.addDataEntry()
+    },
+    computed:{
+      dataReversed: function(){
+        return [...this.data].reverse()
+      },
     },
     methods: {
       calibrationEnded(ppi){
@@ -73,8 +97,18 @@
         newEntry.colors = this.colors
         newEntry.units = this.units
 
-        this.data = newEntry
+        this.data.push(newEntry)
+        this.showDataDetails(this.data.length - 1)
         
+      },
+      showDataDetails(index){
+        this.currentIndex = index
+        this.currentData = this.data[index] 
+        this.dataDetails = true
+      },
+      deleteCurrentEntry(){
+        this.data.splice(this.currentIndex, 1)
+        this.dataDetails = false
       },
       loadCalibration(){
         var cal = null
@@ -131,54 +165,59 @@
         }
       },
       downloadData(){
-        this.$refs.details.triggerPlotDownload()
-
         var time = new Date();
         var text = "Downloaded: " + time + "\n\n"
 
 
         text += "H is the horizontal offset.\n"
-        text += "V is the vertical offset.\n"
-        text += "T is the torsion. It is always in degrees.\n\n\n"
+        text += "V is the vertical offset.\n\n"
 
-
+        text += "Ti is the torsion of the inner marker.\n"
+        text += "To is the torsion of the outer marker.\n"
+        text += "Torsion is always in degrees.\n\n\n"
 
 
         let d = this.data
         //fill up undefined things here to keep the loop below looking cleaner
-        for(var m=0; m<d.data.length; m++){
-          for(var k=0; k<d.data[m].length; k++){
-            d.data[m][k].vu = d.data[m][k].vu===undefined?"-":d.data[m][k].vu
-            d.data[m][k].hu = d.data[m][k].hu===undefined?"-":d.data[m][k].hu
-            d.data[m][k].rr = d.data[m][k].rr===undefined?"-":d.data[m][k].rr
-            d.data[m][k].gr = d.data[m][k].gr===undefined?"-":d.data[m][k].gr
-
+        for(var l=0; l< d.length; l++){
+          for(var m=0; m<d[l].data.length; m++){
+            for(var k=0; k<d[l].data[m].length; k++){
+              d[l].data[m][k].vu = d[l].data[m][k].vu===undefined?"-":d[l].data[m][k].vu
+              d[l].data[m][k].hu = d[l].data[m][k].hu===undefined?"-":d[l].data[m][k].hu
+              d[l].data[m][k].rr = d[l].data[m][k].rr===undefined?"-":d[l].data[m][k].rr
+              d[l].data[m][k].gr = d[l].data[m][k].gr===undefined?"-":d[l].data[m][k].gr
+            }
           }
         }
 
-        let unit = d.units==0?"degrees":"prism dioptres"
-        text += "Viewing distance was: " + d.dist + " meters.\n"
-        text += "Units for H and V: "+unit+".\n"
-        text += "".padEnd(49,'-') + "\n"
-        for(var j=0; j<d.data.length; j++){
-          text += "|"+(" H: "+d.data[j][0].hu).padEnd(15) + 
-                  "|"+(" H: "+d.data[j][1].hu).padEnd(15) + 
-                  "|"+(" H: "+d.data[j][2].hu).padEnd(15) + "|\n"
-
-          text += "|"+(" V: "+d.data[j][0].vu).padEnd(15) + 
-                  "|"+(" V: "+d.data[j][1].vu).padEnd(15) + 
-                  "|"+(" V: "+d.data[j][2].vu).padEnd(15) + "|\n"
-
-          text += "|"+(" Ti: "+d.data[j][0].rr).padEnd(15) + 
-                  "|"+(" Ti: "+d.data[j][1].rr).padEnd(15) + 
-                  "|"+(" Ti: "+d.data[j][2].rr).padEnd(15) + "|\n"
-
-          text += "|"+(" To: "+d.data[j][0].gr).padEnd(15) + 
-                  "|"+(" To: "+d.data[j][1].gr).padEnd(15) + 
-                  "|"+(" To: "+d.data[j][2].gr).padEnd(15) + "|\n"
-
+        for(var i=0; i< d.length; i++){
+          let unit = d[i].units==0?"degrees":"prism dioptres"
+          text += "Measurement name: " + d[i].name + "\n"
+          text += "Viewing distance was: " + d[i].dist + " meters.\n"
+          text += "Units for H and V: "+unit+".\n"
           text += "".padEnd(49,'-') + "\n"
 
+          for(var j=0; j<d[i].data.length; j++){
+            text += "|"+(" H: "+d[i].data[j][0].hu).padEnd(15) + 
+                    "|"+(" H: "+d[i].data[j][1].hu).padEnd(15) + 
+                    "|"+(" H: "+d[i].data[j][2].hu).padEnd(15) + "|\n"
+
+            text += "|"+(" V: "+d[i].data[j][0].vu).padEnd(15) + 
+                    "|"+(" V: "+d[i].data[j][1].vu).padEnd(15) + 
+                    "|"+(" V: "+d[i].data[j][2].vu).padEnd(15) + "|\n"
+
+            text += "|"+(" Ti: "+d[i].data[j][0].rr).padEnd(15) + 
+                    "|"+(" Ti: "+d[i].data[j][1].rr).padEnd(15) + 
+                    "|"+(" Ti: "+d[i].data[j][2].rr).padEnd(15) + "|\n"
+
+            text += "|"+(" To: "+d[i].data[j][0].gr).padEnd(15) + 
+                    "|"+(" To: "+d[i].data[j][1].gr).padEnd(15) + 
+                    "|"+(" To: "+d[i].data[j][2].gr).padEnd(15) + "|\n"
+
+            text += "".padEnd(49,'-') + "\n"
+
+          }
+          text += "\n\n"
         }
       
 

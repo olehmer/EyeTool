@@ -11,8 +11,11 @@
 
 <script>
 
+  import CalculateDistance from "./CalculateDistance.js"
+
   export default{
     props: ["ppi", "data"],
+    mixins: [CalculateDistance],
     data() {
       return {
         canvas: null,
@@ -70,57 +73,23 @@
         let v_offset = window.innerHeight/3
         let h_offset = window.innerWidth/3
 
-        //offsets in mm
-        let v_mm = v_offset/this.ppi*25.4
-        let h_mm = h_offset/this.ppi*25.4
-
         //x and y offsets from settings
-        var xo_mm = 0
-        var yo_mm = 0
-        if(this.data.offset!==undefined){
-          xo_mm =  this.data.offset[0][0].h/this.ppi*25.4;
-          yo_mm =  this.data.offset[0][0].v/this.ppi*25.4;
-        }
-
-        //initialize here
-        var vu = 0
-        var hu = 0
         var xo = 0
         var yo = 0
-
-        if(this.data.units == 0){
-          //units have been set for degrees
-
-          //the vertical offset with units (vu) in degrees
-          let v_angle = Math.atan(v_mm/this.data.dist/1000) //dist in m
-          vu = Math.round(v_angle*18000/Math.PI)/100
-
-          //the horizontal offset with units (hu) in degrees
-          let h_angle = Math.atan(h_mm/this.data.dist/1000) //dist in m
-          hu = Math.round(h_angle*18000/Math.PI)/100
-
-          //the x offset with units in degrees
-          let x_angle = Math.atan(xo_mm/this.data.dist/1000) //dist in m
-          xo = Math.round(x_angle*18000/Math.PI)/100
-
-          //the y offset with units in degrees
-          let y_angle = Math.atan(yo_mm/this.data.dist/1000) //dist in m
-          yo = Math.round(y_angle*18000/Math.PI)/100
-        }
-        else{
-          //units in prism dioptres
-          vu = Math.round(v_mm/this.data.dist*10)/100
-          hu = Math.round(h_mm/this.data.dist*10)/100
-
-          xo = Math.round(xo_mm/this.data.dist*10)/100
-          yo = Math.round(yo_mm/this.data.dist*10)/100
+        if(this.data.offset!==undefined){
+          xo =  this.data.offset[0][0].h
+          yo =  this.data.offset[0][0].v
         }
 
-        this.hSep = hu
-        this.vSep = vu
 
-        this.offsetX = xo
-        this.offsetY = yo
+        this.hSep = this.getDistance(h_offset, this.data.dist, this.ppi, 
+                                     this.data.units)
+        this.vSep = this.getDistance(v_offset, this.data.dist, this.ppi,
+                                     this.data.units)
+        this.offsetX = this.getDistance(xo, this.data.dist, this.ppi, 
+                                        this.data.units)
+        this.offsetY = this.getDistance(yo, this.data.dist, this.ppi,
+                                        this.data.units)
       },
       setCanvasDimensions(){
         /*Preserve the aspect ratio of the tool.*/
@@ -296,11 +265,11 @@
         this.ctx.translate(-(resV[0] - 30), -resV[1])
 
       },
-      downloadPlot(){
+      downloadPlot(name){
         var element = document.createElement('a');
         let image = this.ctx.canvas.toDataURL("image/jpg")
         element.href = image
-        element.download = 'HL-test.jpg'
+        element.download = name + '.jpg'
 
         element.style.display = 'none';
         document.body.appendChild(element);

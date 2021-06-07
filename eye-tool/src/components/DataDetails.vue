@@ -1,16 +1,55 @@
 <template>
 <div class="container">
 
+    <div v-if="!showTool" class="grid-container">
+    <div class="button top-left" v-on:click="confirmDelete = true">
+      Delete Entry
+    </div>
+
+    <Help v-if="showHelp" @closeHelp="showHelp = false;"></Help>
+
+
+    <div class="overlay" v-if="confirmDelete"></div>
+      <div class="confirm-popup" v-if="confirmDelete">
+        <h3>Confirm Delete</h3>
+        <p>Are you sure you want to delete this entry and all its data? This can't
+          be undone.</p>
+
+        <div class="button delete-buttons cancel" 
+          v-on:click="confirmDelete = false">
+          Cancel
+        </div>
+
+        <div class="button delete-buttons yes" v-on:click="deleteEntry">
+          Yes
+        </div>
+    </div>
+
+    <div class="button top-right" v-on:click="closeDetailView" 
+      v-if="dataAll.name && dataAll.name.length > 0">
+      Save
+    </div>
+
+
+    <input class="text" v-model="dataAll.name" placeholder="name this dataset">
+
 
     <div class="overlay" v-if="showPrefs"></div>
     <div class="preferences-container" v-if="showPrefs">
       <Preferences :dataIn="dataAll" :ppi="ppi" @setPrefs="savePreferences"/>
     </div>
 
+    <div v-if="dataAll.name && dataAll.name.length > 0">
+
 
       <div class="button-container">
         <div class="button padded" v-on:click="launchTool()">Launch Tool</div>
-        <div class="button split" v-on:click="showPrefs=true">Preferences</div>
+        <div class="button split" 
+          v-on:click="showPrefs=true; showResults=false">Preferences</div>
+
+        <div class="button split" 
+          v-on:click="showHelp=true;">Help</div>
+
         <div class="button split" v-on:click="showResults = !showResults">
           {{showResults?'Hide Results':'Show Results'}}
         </div>
@@ -69,12 +108,21 @@
               {{dataAll.units==0?"degrees":"prism dioptres"}}.</p>
           <p class="data">H is the measured horizontal offset in 
               {{dataAll.units==0?"degrees":"prism dioptres"}}.</p>
-          <p class="data" style="padding-bottom:20px;">T is the 
-              torsion measurements in degrees.</p>
+            <p class="data">
+              T<sub>i</sub> is the torsion measurement of the 
+              inner marker in degrees.
+            </p>
+            <p class="data" style="padding-bottom:20px;">
+              T<sub>o</sub> is the torsion measurement of the 
+              outer marker in degrees.
+            </p>
           </div>
         </div>
 
         <div v-if="showPlot">
+          <div v-on:click="triggerPlotDownload()" class="plot-download">
+            Download Plot
+          </div>
           <div class="plot-container">
             <PlotData :ppi="ppi" :data="dataAll" ref="plot"/>
           </div>
@@ -84,7 +132,12 @@
 
 
 
+    </div> <!-- end the no-name div -->
+    <div v-else>
+      <p>You must name this dataset before you can make measurements.</p>
+    </div>
 
+  </div> <!-- end the data details content -->
 
   <div class="tool-container" v-if="dataAll.data !== undefined && 
     showTool">
@@ -103,12 +156,14 @@
   import Tool from './Tool.vue'
   import Preferences from './Preferences.vue'
   import PlotData from './PlotData.vue'
+  import Help from './Help.vue'
 
   export default{
     components:{
       Tool,
       Preferences,
-      PlotData
+      PlotData,
+      Help,
     },
     props: ['dataIn', 'ppi'],
     data() {
@@ -120,6 +175,7 @@
         showPrefs: false,
         showResults: false,
         showPlot: true,
+        showHelp: false,
       }
     },
     mounted() {
@@ -132,6 +188,12 @@
     methods: {
       configureLayout(){
 
+      },
+      deleteEntry(){
+        this.$emit('deleteEntry')
+      },
+      closeDetailView(){
+        this.$emit('closeDetailView')
       },
       launchTool(){
         this.showTool = true
@@ -151,7 +213,7 @@
       },
       triggerPlotDownload(){
         if(this.$refs.plot!==undefined){
-          this.$refs.plot.downloadPlot()
+          this.$refs.plot.downloadPlot(this.dataAll.name)
         }
       }
     }
@@ -185,20 +247,7 @@
     input.check{
       margin:5px;
     }
-    div.confirm-popup{
-      position:fixed;
-      top:50%;
-      left:50%;
-      margin-top:-100px;
-      margin-left:-140px;
-      width:280px;
-      height:170px;
-      background-color:white;
-      opacity:1;
-      border:2px solid black;
-      z-index:300;
-      padding:10px;
-    }
+
     h3{
       padding:0;
       margin:0;
@@ -361,9 +410,21 @@
     div.split{
       margin:10px;
       display:inline-block;
-      width:40%;
     }
-
+    div.confirm-popup{
+      position:fixed;
+      top:50%;
+      left:50%;
+      margin-top:-100px;
+      margin-left:-140px;
+      width:280px;
+      height:170px;
+      background-color:white;
+      opacity:1;
+      border:2px solid black;
+      z-index:300;
+      padding:10px;
+    }
     div.result-selector{
       display:inline-block;
       padding:10px;
@@ -377,6 +438,15 @@
     div.active{
       color: #1C79A6;
       font-weight:bold;
+    }
+    div.plot-download{
+      padding:10px;
+      cursor:pointer;
+      font-size:1.0em;
+      color: #1C79A6;
+    }
+    div.plot-download:hover{
+      text-decoration: underline;
     }
 
 </style>
