@@ -112,7 +112,6 @@
         this.drawCircles()
       },
       configureMarkerLocation(){
-        console.log("orl1")
         var centerX = this.ctx.canvas.width/6*(1+2*this.ind.col)
         var centerY = this.ctx.canvas.height/6*(1+2*this.ind.row)
 
@@ -373,7 +372,7 @@
         let cSq = (start.x - end.x)**2 + (start.y - end.y)**2
 
         var alpha = Math.acos((aSq + bSq - cSq)/(2*aSq**0.5*bSq**0.5))
-        alpha = Math.round(alpha*180/Math.PI*10)/10
+        alpha = Math.round(alpha*180/Math.PI)
 
         //let line to check where points are
         var slope = (center.y - start.y)/(center.x - start.x)
@@ -395,14 +394,14 @@
             let alpha = this.getRotation({x:this.startX, y:this.startY}, 
                                          {x:mouseX, y:mouseY},
                                          {x:this.red.x, y:this.red.y})
-            this.red.r = this.currentRotation + alpha
+            this.red.r = (this.currentRotation + alpha)%180
 
           }
           else {
             let alpha = this.getRotation({x:this.startX, y:this.startY}, 
                                          {x:mouseX, y:mouseY},
                                          {x:this.green.x, y:this.green.y})
-            this.green.r = this.currentRotation + alpha
+            this.green.r = (this.currentRotation + alpha)%180
 
           }
 
