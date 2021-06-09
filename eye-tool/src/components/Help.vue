@@ -17,7 +17,7 @@
             <li>Press i to rotate inner marker with drag</li>
             <li>Press o to rotate outer maker with drag</li>
             <li>Press p to end rotation measurements</li>
-            <li>Press g to toggle guide dots</li>
+            <li>Press g to toggle guide dots (none, 1 in center, or 9)</li>
             <li>Press q to exit the tool</li>
         </ul>
       </p>

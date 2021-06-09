@@ -58,7 +58,7 @@
         ind: {row:1, col:1},
         rotateInner: false,
         rotateOuter: false,
-        showGrayDots: false,
+        showGrayDots: 0,
         currentRotation: 0,
       }
     },
@@ -208,11 +208,12 @@
           for(var j=0; j<3; j++){
             if(i != this.ind.row || j != this.ind.col){
               //draw a circle
-              this.ctx.beginPath()
-              this.ctx.arc(w_step*(1 + 2*j), h_step*(1 + 2*i), 
-                           this.data.size/1.5, 0, 2*Math.PI)
-              this.ctx.fill()
-
+              if(this.showGrayDots == 2 || (1==i && 1==j)){
+                this.ctx.beginPath()
+                this.ctx.arc(w_step*(1 + 2*j), h_step*(1 + 2*i), 
+                             this.data.size/1.5, 0, 2*Math.PI)
+                this.ctx.fill()
+              }
             }
           }
         }
@@ -223,7 +224,7 @@
 
         //this.drawGrid()
 
-        if(this.showGrayDots){
+        if(this.showGrayDots > 0){
           this.drawGuideCircles()
         }
 
@@ -495,7 +496,7 @@
             break;
           case 71:
             //g
-            this.showGrayDots = !this.showGrayDots
+            this.showGrayDots = (this.showGrayDots + 1)%3
             break;
           case 73:
             //i key, change inner marker angle
