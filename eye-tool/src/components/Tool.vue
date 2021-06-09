@@ -59,6 +59,7 @@
         rotateInner: false,
         rotateOuter: false,
         showGrayDots: false,
+        currentRotation: 0,
       }
     },
     mounted() {
@@ -89,7 +90,7 @@
         this.canvas.ontouchend=this.mouseUp;
         this.canvas.ontouchcancel=this.mouseUp;
 
-        this.canvas.onwheel=this.scroll;
+        //this.canvas.onwheel=this.scroll;
 
         document.onkeyup = this.handleKey
 
@@ -111,6 +112,7 @@
         this.drawCircles()
       },
       configureMarkerLocation(){
+        console.log("orl1")
         var centerX = this.ctx.canvas.width/6*(1+2*this.ind.col)
         var centerY = this.ctx.canvas.height/6*(1+2*this.ind.row)
 
@@ -138,9 +140,6 @@
           //preferences were set
           this.red.x -= this.data.offset[0][0].h
           this.red.y += this.data.offset[0][0].v
-          if(this.entries[this.ind.row][this.ind.col].v === undefined){
-            this.red.r = this.data.offset[0][0].rr
-          }
         }
 
         if(this.entries[this.ind.row][this.ind.col].v === undefined){
@@ -197,11 +196,14 @@
         this.ctx.stroke()
        
       },
-      drawGrayCircles(){
+      drawGuideCircles(){
         let w_step = this.ctx.canvas.width/6
         let h_step = this.ctx.canvas.height/6
 
-        this.ctx.fillStyle = "#222222" 
+        //this.ctx.fillStyle = "#222222" 
+        this.ctx.fillStyle = `rgb(${this.data.colors[this.rc][0]/3}, 
+                                  ${this.data.colors[this.rc][1]/3}, 
+                                  ${this.data.colors[this.rc][2]/3})`
 
         for(var i=0; i<3; i++){
           for(var j=0; j<3; j++){
@@ -223,7 +225,7 @@
         //this.drawGrid()
 
         if(this.showGrayDots){
-          this.drawGrayCircles()
+          this.drawGuideCircles()
         }
 
 
@@ -311,6 +313,14 @@
 
         this.startX = parseInt(e.clientX)
         this.startY = parseInt(e.clientY)
+
+        //store the rotation
+        if(this.rotateInner){
+          this.currentRotation = this.red.r
+        }
+        else {
+          this.currentRotation = this.green.r
+        }
       },
       touchDown(e){
         e.preventDefault()
@@ -321,6 +331,14 @@
         }
         this.startX = parseInt(e.touches[0].clientX)
         this.startY = parseInt(e.touches[0].clientY)
+
+        //store the rotation
+        if(this.rotateInner){
+          this.currentRotation = this.red.r
+        }
+        else {
+          this.currentRotation = this.green.r
+        }
       },
       move(mouseX, mouseY){
         if(this.rotateInner || this.rotateOuter){
@@ -348,6 +366,50 @@
           this.updateData()
         }
       },
+      getRotation(start, end, center){
+
+        let aSq = (center.x - start.x)**2 + (center.y - start.y)**2
+        let bSq = (center.x - end.x)**2 + (center.y - end.y)**2
+        let cSq = (start.x - end.x)**2 + (start.y - end.y)**2
+
+        var alpha = Math.acos((aSq + bSq - cSq)/(2*aSq**0.5*bSq**0.5))
+        alpha = Math.round(alpha*180/Math.PI*10)/10
+
+        //let line to check where points are
+        var slope = (center.y - start.y)/(center.x - start.x)
+
+        let intercept = start.y - slope*start.x
+        if(end.y < slope*end.x + intercept){
+          alpha = -1*alpha
+        }
+        if(start.x < center.x){
+          alpha = -1*alpha
+        }
+        
+        return alpha
+ 
+      },
+      moveRotate(mouseX, mouseY){
+        if(this.dragging){
+          if(this.rotateInner){
+            let alpha = this.getRotation({x:this.startX, y:this.startY}, 
+                                         {x:mouseX, y:mouseY},
+                                         {x:this.red.x, y:this.red.y})
+            this.red.r = this.currentRotation + alpha
+
+          }
+          else {
+            let alpha = this.getRotation({x:this.startX, y:this.startY}, 
+                                         {x:mouseX, y:mouseY},
+                                         {x:this.green.x, y:this.green.y})
+            this.green.r = this.currentRotation + alpha
+
+          }
+
+          this.drawCircles()
+          this.updateData()
+        }
+      },
       mouseMove(e){
         e.preventDefault()
         e.stopPropagation()
@@ -356,6 +418,8 @@
         let mouseY = parseInt(e.clientY);
         
         this.move(mouseX, mouseY)
+        this.moveRotate(mouseX, mouseY)
+
       },
       touchMove(e){
         e.preventDefault()
@@ -371,41 +435,6 @@
         e.stopPropagation()
 
         this.dragging = false
-      },
-      scroll(e){
-        e.preventDefault()
-        e.stopPropagation()
-
-        if(e.deltaY <0){
-          if(this.rotateInner){
-            this.red.r -= 1
-            if(this.red.r < -90){
-              this.red.r += 180
-            }
-          }
-          if(this.rotateOuter){
-            this.green.r -= 1
-            if(this.green.r < -90){
-              this.green.r += 180
-            }
-          }
-        }
-        else{
-          if(this.rotateInner){
-            this.red.r += 1
-            if(this.red.r > 90){
-              this.red.r -= 180
-            }
-          }
-          if(this.rotateOuter){
-            this.green.r += 1
-            if(this.green.r > 90){
-              this.green.r -= 180
-            }
-          }
-        }
-        this.drawCircles()
-        this.updateData()
       },
       handleKey(event){
         event.preventDefault()
@@ -488,15 +517,14 @@
             //q, emit the quit
             this.$emit("exitTool");
             break;
-          case 27:
-            //ESC, emit the quit
-            this.$emit("exitTool");
-            break;
         }
+
+        this.configureMarkerLocation()
+
         if(key > 48 && key < 58){
           this.randomCharacters()
+          this.updateData()
         }
-        this.configureMarkerLocation()
         this.drawCircles()
       },
       updateData(){

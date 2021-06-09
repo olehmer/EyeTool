@@ -14,11 +14,11 @@
           Tool controls:
           <ul>
             <li>Select measurment positions with 1 through 9 keys</li>
-            <li>Press i to rotate inner marker with scroll</li>
-            <li>Press o to rotate outer maker with scroll</li>
+            <li>Press i to rotate inner marker with drag</li>
+            <li>Press o to rotate outer maker with drag</li>
             <li>Press p to end rotation measurements</li>
             <li>Press g to toggle guide dots</li>
-            <li>Press ESC or q to exit the tool</li>
+            <li>Press q to exit the tool</li>
         </ul>
       </p>
   </div>
@@ -52,10 +52,6 @@
         switch(key){
           case 81:
             //q, emit the quit
-            this.closeHelp();
-            break;
-          case 27:
-            //ESC, emit the quit
             this.closeHelp();
             break;
         }
